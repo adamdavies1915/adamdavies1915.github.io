@@ -3,9 +3,9 @@
 layout: post
 title: "Turn Your Streams into Insights: Downloading Your Spotify History & Analyzing It with ChatGPT"
 subtitle: "A step-by-step guide to transforming raw listening data into meaningful patterns"
-cover-img: /assets/img/spotify-history/cover.jpg
+cover-img: /assets/img/spotify-history/cover.png
 thumbnail-img: /assets/img/spotify-history/thumb.png
-share-img: /assets/img/spotify-history/cover.jpg
+share-img: /assets/img/spotify-history/cover.png
 tags: \[spotify, music-data, tutorial, analysis]
 author: Adam Davies
 ---
