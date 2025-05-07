@@ -1,0 +1,10 @@
+
+services:
+  site:
+    build: .
+    ports:
+      - "4000:4000"      # http://localhost:4000
+    volumes:
+      - .:/srv/jekyll    # live‑edit files on the host
+    environment:
+      JEKYLL_ENV: development

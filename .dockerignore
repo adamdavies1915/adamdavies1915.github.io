@@ -1,0 +1,10 @@
+# throw‑away build artefacts
+_site
+vendor
+
+# repo metadata
+.git
+
+# misc clutter
+*.log
+.DS_Store

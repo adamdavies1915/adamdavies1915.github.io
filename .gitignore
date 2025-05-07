@@ -1,4 +1,5 @@
-# project
+# Jekyll runtime files
+.jekyll-metadata
 _site
 .sass-cache
 .vagrant
@@ -11,3 +12,4 @@ ehthumbs.db
 Gemfile.lock
 
 beautiful-jekyll-theme-*.gem
+
