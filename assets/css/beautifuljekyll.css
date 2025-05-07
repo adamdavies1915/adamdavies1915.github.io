@@ -24,22 +24,6 @@ layout: null
   --mid-col: #808080;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page-col: #121212;
-    --text-col: #e0e0e0;
-    --link-col: #bb86fc;
-    --hover-col: #3700b3;
-    --navbar-col: #1f1f1f;
-    --navbar-text-col: #e0e0e0;
-    --navbar-border-col: #333333;
-    --footer-col: #1f1f1f;
-    --footer-text-col: #e0e0e0;
-    --footer-link-col: #bb86fc;
-    --footer-hover-col: #3700b3;
-  }
-}
-
 /* --- General --- */
 
 html {
@@ -1138,5 +1122,74 @@ pre {
   }
   #nav-search-text {
     display: inline-block;
+  }
+}
+
+/* Move the dark mode styles to the bottom of the stylesheet */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Softer background color - not pure black */
+    --page-col: #222222;
+    
+    /* Slightly less bright text color */
+    --text-col: #cccccc;
+    
+    /* More muted accent colors */
+    --link-col: #a87ef0;
+    --hover-col: #7b4ec9;
+    
+    /* Navbar with a bit more contrast from page */
+    --navbar-col: #2a2a2a;
+    --navbar-text-col: #bbbbbb;
+    --navbar-border-col: #444444;
+    
+    /* Footer with matching contrast */
+    --footer-col: #2a2a2a;
+    --footer-text-col: #bbbbbb;
+    --footer-link-col: #a87ef0;
+    --footer-hover-col: #7b4ec9;
+  }
+  
+  /* Soften the table alternating rows */
+  table tr:nth-child(2n) {
+    background-color: #2e2e2e; /* Softer alternating row color */
+  }
+  
+  table tr {
+    background-color: #252525; /* Softer default row color */
+  }
+  
+  /* Adjust code blocks for dark mode */
+  code {
+    color: #f08c92;
+    background-color: #333333;
+  }
+  
+  /* Adjust blockquotes to be more visible in dark mode */
+  blockquote {
+    border-left-color: #555555;
+    color: #aaaaaa;
+  }
+  
+  /* Improve notification boxes for dark mode */
+  .box-note {
+    background-color: #2a2a2a;
+    border-left-color: #5b9bd5;
+  }
+  
+  .box-warning {
+    background-color: #3a3522;
+    border-left-color: #f1c40f;
+  }
+  
+  .box-error {
+    background-color: #3a2222;
+    border-left-color: #e74c3c;
+  }
+  
+  .box-success {
+    background-color: #0b270b; /* Softer green background */
+    border-left-color: #1e8c5a; /* Muted green border */
   }
 }

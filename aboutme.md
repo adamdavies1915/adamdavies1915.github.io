@@ -28,7 +28,7 @@ I'm developing a side project using Flutter, NodeJS, and MongoDB focused on impr
 
 ### Outside of Work
 
-When not coding, you'll find me cycling around New Orleans, kayaking the bayous, or running distance. I've spent three years working remotely while traveling throughout Europe.
+When not coding, you'll find me cycling around New Orleans, kayaking the bayous, or running distance. I've spent three years working remotely while traveling throughout Europe. You'll usually find me abroad during the summer avoiding the hot New Orleans summers.
 
 ### Education
 
