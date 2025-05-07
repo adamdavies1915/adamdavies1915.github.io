@@ -17,4 +17,4 @@ RUN bundle config set --local path "/usr/local/bundle" \
 COPY . .
 
 EXPOSE 4000
-CMD ["bundle", "exec", "jekyll", "serve", "--host", "0.0.0.0", "--watch", "--incremental"]
+CMD ["bundle", "exec", "jekyll", "serve", "--host", "0.0.0.0", "--watch",  "--force_polling", "--incremental"]
