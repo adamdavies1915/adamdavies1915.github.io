@@ -24,6 +24,22 @@ layout: null
   --mid-col: #808080;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-col: #121212;
+    --text-col: #e0e0e0;
+    --link-col: #bb86fc;
+    --hover-col: #3700b3;
+    --navbar-col: #1f1f1f;
+    --navbar-text-col: #e0e0e0;
+    --navbar-border-col: #333333;
+    --footer-col: #1f1f1f;
+    --footer-text-col: #e0e0e0;
+    --footer-link-col: #bb86fc;
+    --footer-hover-col: #3700b3;
+  }
+}
+
 /* --- General --- */
 
 html {
