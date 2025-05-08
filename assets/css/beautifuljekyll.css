@@ -1192,4 +1192,11 @@ pre {
     background-color: #0b270b; /* Softer green background */
     border-left-color: #1e8c5a; /* Muted green border */
   }
+
+  .highlight {
+    background-color: #2a2a2a; /* Softer background for code blocks */
+    color: #cccccc; /* Softer text color for code blocks */
+    border: 1px solid #444444; /* Softer border color */
+    border-radius: 0.3125rem; /* Softer border radius */
+  }
 }
