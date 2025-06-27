@@ -7,27 +7,132 @@
   }
 }
 
-blockquote > p {
-  display: inline-block;
-  padding: 10px 20px;
+blockquote {
+  margin: 2rem 0;
+  padding: 1rem 1.5rem;
   background: $gray;
-  border-left: 2px solid $primary-color;
-  font-style: italic;
-  font-size: 22px;
-  line-height: inherit;
+  border-left: 4px solid $primary-color;
+  border-radius: 0.25rem;
+  
+  p {
+    margin-bottom: 1rem;
+    font-style: italic;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: $text-color;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  ul, ol {
+    margin: 0.5rem 0;
+    
+    li {
+      margin-bottom: 0.25rem;
+    }
+  }
 }
 
 .content {
-  * {
-    margin-bottom: 20px;
+  p {
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
   }
-
-  strong {
+  
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
     font-family: $secondary-font;
-    font-size: 22px;
-    font-weight: normal;
     color: $text-color-dark;
-    display: inherit;
-    line-height: 1.5;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  h2 {
+    font-size: 2rem;
+  }
+  
+  h3 {
+    font-size: 1.75rem;
+  }
+  
+  ul, ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+    
+    li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+  }
+  
+  code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+    color: #e83e8c;
+  }
+  
+  pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+  }
+  
+  img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.post-content {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: $text-color;
+  
+  p {
+    margin-bottom: 1.5rem;
+  }
+  
+  strong {
+    font-weight: 600;
+    color: $text-color-dark;
+  }
+  
+  em {
+    font-style: italic;
+  }
+  
+  a {
+    color: $primary-color;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.post-featured-image {
+  img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+  }
+}
+
+.post-meta {
+  .badge {
+    font-size: 0.75rem;
+    font-weight: normal;
+    padding: 0.25rem 0.5rem;
   }
 }
