@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
-gem 'bundler'
-gem 'jekyll'
+gem 'jekyll', '~> 4.2'
 gem 'jekyll-sitemap'
-gem 'wdm', '>= 0.1.0'
-gem "webrick", "~> 1.7"
+gem 'webrick'
+gem 'jekyll-sass-converter', '~> 2.1'
+gem 'bigdecimal'

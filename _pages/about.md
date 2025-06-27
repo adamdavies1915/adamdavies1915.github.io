@@ -1,18 +1,15 @@
 ---
 layout: about
 title: About Me
-author: Johnathan Smith
+author: Adam Davies
 image: assets/images/about/author.jpg
 signature: assets/images/about/signature.png
 ---
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-commodo consequat.
+Experienced full stack software engineer with 8+ years building scalable, production-ready systems across fintech, insurtech, and hospitality tech sectors. Specialized in Java and Node.js backends and React frontends with a proven track record of delivering both critical infrastructure and innovative features.
 
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-Excepteur sint occaecat cupidatat non proident.
+Currently based in New Orleans, Louisiana, I embrace modern development practices including LLM-assisted workflows while maintaining strong manual coding expertise. I thrive in collaborative agile environments, adept at translating complex requirements into elegant technical solutions.
 
-Deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
-architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia.
+My experience spans from building regulatory compliance systems at Morgan Stanley and Valstro, to developing insurance underwriting platforms at Ki Insurance, and creating digital ordering solutions at PepperHQ. I have a particular passion for backend architecture, API design, and creating systems that scale.
+
+When I'm not coding, you'll find me cycling through New Orleans, kayaking the bayous, or planning my next adventure. I'm also a board member of Bike Easy, a local bicycle advocacy group promoting sustainable transportation and safer streets in our community.

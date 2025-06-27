@@ -1,5 +1,5 @@
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://adamdavies.dev" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
 markdown: kramdown
@@ -11,12 +11,23 @@ compress_html:
   comments: all
   startings: [html, head, body]
 
+# Collections
+collections:
+  projects:
+    output: true
+    permalink: /:collection/:name/
+
 # Pages Path
 defaults:
   - scope:
       path: "_pages"
     values:
       permalink: /:basename:output_ext
+  - scope:
+      path: "_projects"
+      type: "projects"
+    values:
+      layout: "page"
 
 include:
   - _pages

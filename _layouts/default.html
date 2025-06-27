@@ -12,7 +12,9 @@ layout: compress
 
   {{ content }}
 
-  {% include contact-section.html %}
+  {% if page.show_contact or layout.show_contact %}
+    {% include contact-section.html %}
+  {% endif %}
 
   {% include footer.html %}
 
