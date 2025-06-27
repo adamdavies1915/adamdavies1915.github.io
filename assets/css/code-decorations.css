@@ -1,0 +1,458 @@
+/* Code-themed floating decorations */
+
+/* Container for hero section to prevent overflow */
+.hero-area {
+  overflow: hidden;
+  position: relative;
+}
+
+/* Constrain background layer to prevent overlap */
+.layer-bg {
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.layer-bg img {
+  height: 100%;
+  max-height: 100vh;
+  object-fit: cover;
+  object-position: top;
+}
+
+.code-element {
+  position: absolute;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.7;
+  max-width: 250px;
+  word-wrap: break-word;
+}
+
+/* Floating brackets */
+.code-bracket-1 {
+  font-size: 4rem;
+  color: #2bfdff;
+  animation: float 6s ease-in-out infinite;
+}
+
+.code-bracket-2 {
+  font-size: 3rem;
+  color: #fdb157;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+/* Floating code symbols */
+.code-symbol-1 {
+  font-size: 2.5rem;
+  color: #9473e6;
+  animation: rotate 10s linear infinite;
+}
+
+.code-symbol-2 {
+  font-size: 3.5rem;
+  color: #ffbcaa;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+/* Binary code */
+.binary-code {
+  font-size: 1.2rem;
+  color: #41228e;
+  line-height: 1.2;
+  opacity: 0.5;
+  animation: fadeInOut 5s ease-in-out infinite;
+}
+
+/* Git commit dots */
+.git-dots {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.git-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: commitPulse 3s ease-in-out infinite;
+}
+
+.git-dot:nth-child(1) { background: #28a745; }
+.git-dot:nth-child(2) { background: #ffc107; }
+.git-dot:nth-child(3) { background: #dc3545; }
+.git-dot:nth-child(4) { background: #17a2b8; }
+
+/* Terminal cursor */
+.terminal-cursor {
+  width: 15px;
+  height: 20px;
+  background: #2bfdff;
+  animation: blink 1s infinite;
+}
+
+/* Code snippet */
+.code-snippet {
+  background: rgba(65, 34, 142, 0.1);
+  padding: 10px;
+  border-radius: 8px;
+  border-left: 4px solid #41228e;
+  font-size: 0.9rem;
+  color: #41228e;
+  max-width: 200px;
+  animation: slideIn 8s ease-in-out infinite;
+}
+
+/* Floating JSON */
+.json-object {
+  background: rgba(43, 253, 255, 0.1);
+  padding: 8px 15px;
+  border-radius: 10px;
+  border: 2px solid #2bfdff;
+  font-size: 0.8rem;
+  color: #2bfdff;
+  animation: float 7s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes commitPulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes slideIn {
+  0%, 100% { transform: translateX(-10px); opacity: 0.5; }
+  50% { transform: translateX(10px); opacity: 1; }
+}
+
+/* Lambda and arrow functions */
+.lambda-symbol {
+  font-size: 2.8rem;
+  color: #28a745;
+  animation: rotate 12s linear infinite;
+}
+
+.arrow-function {
+  font-size: 1.5rem;
+  color: #ffc107;
+  animation: slideIn 6s ease-in-out infinite;
+}
+
+/* API symbols */
+.api-endpoint {
+  background: rgba(40, 167, 69, 0.1);
+  padding: 8px 12px;
+  border-radius: 15px;
+  border: 2px solid #28a745;
+  font-size: 0.7rem;
+  color: #28a745;
+  font-weight: bold;
+  animation: pulse 5s ease-in-out infinite;
+}
+
+/* Docker container */
+.docker-container {
+  background: rgba(23, 162, 184, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid #17a2b8;
+  font-size: 0.8rem;
+  color: #17a2b8;
+  max-width: 150px;
+  animation: float 9s ease-in-out infinite;
+}
+
+/* Override existing layer positioning to center elements on homepage */
+.layer#l2 {
+  top: 20% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-350px);
+}
+.layer#l3 {
+  top: 30% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(310px);
+}
+.layer#l4 {
+  top: 40% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(270px);
+}
+.layer#l5 {
+  bottom: 40% !important;
+  top: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-310px);
+}
+.layer#l6 {
+  top: 60% !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-270px);
+}
+.layer#l7 {
+  bottom: 30% !important;
+  top: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(330px);
+}
+.layer#l8 {
+  top: 15% !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(230px);
+}
+.layer#l9 {
+  bottom: 50% !important;
+  top: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(190px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .layer#l2 .code-element { transform: translateX(-100px); }
+  .layer#l3 .code-element { transform: translateX(80px); }
+  .layer#l4 .code-element { transform: translateX(60px); }
+  .layer#l5 .code-element { transform: translateX(-80px); }
+  .layer#l6 .code-element { transform: translateX(-60px); }
+  .layer#l7 .code-element { transform: translateX(100px); }
+  .layer#l8 .code-element { transform: translateX(40px); }
+  .layer#l9 .code-element { transform: translateX(20px); }
+}
+
+@media (max-width: 992px) {
+  .layer#l2 .code-element { transform: translateX(-80px); }
+  .layer#l3 .code-element { transform: translateX(60px); }
+  .layer#l4 .code-element { transform: translateX(40px); }
+  .layer#l5 .code-element { transform: translateX(-60px); }
+  .layer#l6 .code-element { transform: translateX(-40px); }
+  .layer#l7 .code-element { transform: translateX(80px); }
+  .layer#l8 .code-element { transform: translateX(20px); }
+  .layer#l9 .code-element { transform: translateX(0px); }
+}
+
+@media (max-width: 768px) {
+  .layer#l2 .code-element { transform: translateX(-60px); }
+  .layer#l3 .code-element { transform: translateX(40px); }
+  .layer#l4 .code-element { transform: translateX(20px); }
+  .layer#l5 .code-element { transform: translateX(-40px); }
+  .layer#l6 .code-element { transform: translateX(-20px); }
+  .layer#l7 .code-element { transform: translateX(60px); }
+  .layer#l8 .code-element { transform: translateX(0px); }
+  .layer#l9 .code-element { transform: translateX(-20px); }
+}
+
+@media (max-width: 768px) {
+  /* Reduce font sizes on smaller screens */
+  .code-bracket-1 { font-size: 3rem; }
+  .code-bracket-2 { font-size: 2.5rem; }
+  .code-symbol-1 { font-size: 2rem; }
+  .code-symbol-2 { font-size: 2.8rem; }
+  .code-snippet { font-size: 0.8rem; max-width: 150px; }
+  .json-object { font-size: 0.7rem; max-width: 140px; }
+  .binary-code { font-size: 1rem; }
+}
+
+@media (max-width: 576px) {
+  .layer#l2 .code-element { transform: translateX(-40px); }
+  .layer#l3 .code-element { transform: translateX(20px); }
+  .layer#l4 .code-element { transform: translateX(0px); }
+  .layer#l5 .code-element { transform: translateX(-20px); }
+  .layer#l6 .code-element { transform: translateX(0px); }
+  .layer#l7 .code-element { transform: translateX(40px); }
+  .layer#l8 .code-element { transform: translateX(-10px); }
+  .layer#l9 .code-element { transform: translateX(-30px); }
+  
+  /* Further reduce font sizes on mobile */
+  .code-bracket-1 { font-size: 2.5rem; }
+  .code-bracket-2 { font-size: 2rem; }
+  .code-symbol-1 { font-size: 1.5rem; }
+  .code-symbol-2 { font-size: 2.2rem; }
+  .code-snippet { font-size: 0.7rem; max-width: 120px; padding: 8px; }
+  .json-object { font-size: 0.6rem; max-width: 110px; padding: 10px; }
+  .binary-code { font-size: 0.9rem; }
+  .git-dot { width: 8px; height: 8px; }
+}
+
+/* Project Page Styling */
+.project-header {
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 2rem;
+}
+
+.project-image {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.project-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.project-section {
+  margin-bottom: 2.5rem;
+}
+
+.project-section h2,
+.project-section h3 {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.feature-item {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  height: 100%;
+  border-left: 3px solid #007bff;
+}
+
+.feature-item h5 {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.project-sidebar {
+  position: sticky;
+  top: 2rem;
+}
+
+.project-sidebar .card {
+  border-radius: 12px;
+}
+
+.project-sidebar .badge {
+  font-size: 0.75rem;
+  padding: 0.4em 0.6em;
+}
+
+.project-details div {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.project-details div:last-child {
+  border-bottom: none;
+}
+
+.project-links .btn {
+  font-weight: 500;
+  padding: 0.6rem 1.5rem;
+  border-radius: 25px;
+}
+
+.project-meta-compact {
+  text-align: right;
+}
+
+/* Development Timeline Styling */
+.development-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.development-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, #007bff, #6c757d);
+}
+
+.timeline-item {
+  position: relative;
+  padding: 1rem 0;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-left: 1rem;
+  border-left: 3px solid #007bff;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2.25rem;
+  top: 1.5rem;
+  width: 12px;
+  height: 12px;
+  background: #007bff;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 3px #007bff;
+}
+
+.timeline-item h5 {
+  color: #007bff;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 991.98px) {
+  .project-meta-compact {
+    text-align: left;
+    margin-top: 1rem;
+  }
+  
+  .project-sidebar {
+    position: static;
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .project-header {
+    text-align: center;
+  }
+  
+  .project-links {
+    text-align: center;
+  }
+}
