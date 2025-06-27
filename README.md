@@ -1,6 +1,13 @@
-# Kross Jekyll
+# My Personal Website
 
-Kross Jekyll Creative Portfolio Template ported from [Kross HTML Template](https://themefisher.com/products/kross/)
+This is my personal website, showcasing my portfolio and blog. It's built with the Kross Jekyll Creative Portfolio Template.
+
+## Recent Improvements
+
+- **Blog Enhancements**: Added a new blog post "Turn Your Streams Into Insights" about Spotify data analysis.
+- **Styling Updates**: Improved SCSS for better markdown support and HTML structure.
+- **Asset Cleanup**: Removed unused images and updated site assets for efficiency.
+- **Docker Support**: Added Docker configuration for containerized local development.
 
 ## Demo
 
@@ -34,10 +41,27 @@ Things you can customize in `_data/settings.yml` (no HTML/CSS):
 - Client Slider Section
 - Contact Section
 
+## Local Development
+
+### Standard Jekyll Development
+To run the site locally, navigate to the theme directory and run:
+```bash
+bundle install
+bundle exec jekyll serve
+```
+
+### Docker Development (Recommended)
+For a consistent development environment, use Docker:
+```bash
+docker-compose up
+```
+This will build and serve the site at `http://localhost:4000`.
+
 ## Deployment
 
-To run the theme locally, navigate to the theme directory and run `bundle install` to install the dependencies, then run `jekyll serve` or `bundle exec jekyll serve` to start the Jekyll server.
-I would recommend checking the [Deployment Methods](https://jekyllrb.com/docs/deployment-methods/) page on Jekyll's website.
+The site is configured for GitHub Pages deployment. Any push to the main branch will automatically deploy the site.
+
+For other deployment methods, check the [Deployment Methods](https://jekyllrb.com/docs/deployment-methods/) page on Jekyll's website.
 
 ## Reporting Issues
 
