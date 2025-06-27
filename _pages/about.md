@@ -4,6 +4,7 @@ title: About Me
 author: Adam Davies
 image: assets/images/about/author.jpg
 signature: assets/images/about/signature.png
+cv: assets/cv.pdf
 ---
 
 Experienced full stack software engineer with 8+ years building scalable, production-ready systems across fintech, insurtech, and hospitality tech sectors. Specialized in Java and Node.js backends and React frontends with a proven track record of delivering both critical infrastructure and innovative features.

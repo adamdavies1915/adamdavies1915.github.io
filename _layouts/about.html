@@ -38,6 +38,11 @@ layout: default
         </div>
         <img src="{{ site.baseurl }}/{{ page.signature }}" alt="signature" class="img-fluid">
         <h4>{{ page.author }}</h4>
+        {% if page.cv %}
+        <a href="{{ site.baseurl }}/{{ page.cv }}" class="btn btn-outline-primary mt-3" download>
+          <i class="ti-download"></i> Download CV
+        </a>
+        {% endif %}
       </div>
     </div>
   </div>
