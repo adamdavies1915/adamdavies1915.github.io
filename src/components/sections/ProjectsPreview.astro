@@ -2,9 +2,10 @@
 import Button from '../ui/Button.astro';
 import Card from '../ui/Card.astro';
 import Prompt from '../terminal/Prompt.astro';
+import type { GitHubProject } from '../../lib/github';
 
 interface Props {
-  projects: any[];
+  projects: GitHubProject[];
 }
 
 const { projects } = Astro.props;
@@ -22,27 +23,29 @@ const { projects } = Astro.props;
 
     <!-- Projects grid -->
     <div class="grid md:grid-cols-2 gap-8">
-      {projects.slice(0, 4).map((project, i) => (
+      {projects.map((project, i) => (
         <div class="animate-on-scroll" style={`animation-delay: ${i * 0.1}s;`}>
-          <Card href={project.data.link || `/projects/${project.slug}`}>
+          <Card href={project.github}>
             <div class="p-6">
               <!-- Project icon/emoji -->
-              {project.data.emoji && (
-                <span class="text-4xl mb-4 block">{project.data.emoji}</span>
+              {project.emoji && (
+                <span class="text-4xl mb-4 block">{project.emoji}</span>
               )}
 
               <!-- Title -->
               <h3 class="font-[var(--font-display)] text-xl font-bold text-gray-100 mb-2 group-hover:text-[var(--color-terminal-green)] transition-colors">
-                {project.data.title}
+                {project.title}
               </h3>
 
-              <!-- Description -->
-              <p class="text-gray-400 text-sm mb-4">{project.data.description}</p>
+              <!-- Description (from summary.md if available) -->
+              <p class="text-gray-400 text-sm mb-4">
+                {project.summary ? project.summary.split('\n')[0].slice(0, 150) : project.description}
+              </p>
 
               <!-- Tags -->
-              {project.data.tags && (
+              {project.tags && project.tags.length > 0 && (
                 <div class="flex flex-wrap gap-2">
-                  {project.data.tags.slice(0, 3).map((tag: string) => (
+                  {project.tags.slice(0, 3).map((tag: string) => (
                     <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-cyan)] rounded">
                       {tag}
                     </span>

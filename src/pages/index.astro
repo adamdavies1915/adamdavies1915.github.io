@@ -5,22 +5,20 @@ import About from '../components/sections/About.astro';
 import BlogPreview from '../components/sections/BlogPreview.astro';
 import ProjectsPreview from '../components/sections/ProjectsPreview.astro';
 import { getCollection } from 'astro:content';
+import { fetchGitHubProjects } from '../lib/github';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 const recentPosts = posts
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
 
-const projects = await getCollection('projects');
-const featuredProjects = projects
-  .filter((p) => p.data.featured)
-  .sort((a, b) => (a.data.order || 99) - (b.data.order || 99))
-  .slice(0, 4);
+// Fetch projects from GitHub
+const projects = await fetchGitHubProjects('adamdavies1915', 'sideproject');
 ---
 
 <BaseLayout>
   <Hero />
   <About />
-  <ProjectsPreview projects={featuredProjects} />
+  <ProjectsPreview projects={projects.slice(0, 4)} />
   <BlogPreview posts={recentPosts} />
 </BaseLayout>

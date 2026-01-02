@@ -13,22 +13,6 @@ const blogCollection = defineCollection({
   }),
 });
 
-const projectsCollection = defineCollection({
-  type: 'content',
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    emoji: z.string().optional(),
-    image: z.string().optional(),
-    link: z.string().optional(),
-    github: z.string().optional(),
-    tags: z.array(z.string()).optional(),
-    featured: z.boolean().default(false),
-    order: z.number().optional(),
-  }),
-});
-
 export const collections = {
   blog: blogCollection,
-  projects: projectsCollection,
 };
