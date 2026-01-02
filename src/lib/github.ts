@@ -96,14 +96,31 @@ export async function fetchGitHubProjects(
           console.log(`No summary.md for ${repo.name}`);
         }
 
+        // Parse title from summary.md if it starts with a heading
+        let title = repo.name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        let cleanSummary = summary;
+
+        if (summary) {
+          const lines = summary.trim().split('\n');
+          const firstLine = lines[0].trim();
+
+          // Check if first line is a markdown heading (# Title or ## Title)
+          const headingMatch = firstLine.match(/^#{1,2}\s+(.+)$/);
+          if (headingMatch) {
+            title = headingMatch[1].trim();
+            // Remove the title line from the summary
+            cleanSummary = lines.slice(1).join('\n').trim();
+          }
+        }
+
         return {
-          title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+          title,
           description: repo.description || 'No description available',
           emoji: getEmojiForLanguage(repo.language),
           link: repo.html_url,
           github: repo.html_url,
           tags: [repo.language, ...repo.topics.filter(t => t !== topic)].filter(Boolean) as string[],
-          summary,
+          summary: cleanSummary,
           stars: repo.stargazers_count,
           language: repo.language,
           lastUpdated: new Date(repo.pushed_at),
