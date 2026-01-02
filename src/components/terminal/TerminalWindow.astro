@@ -1,0 +1,25 @@
+---
+interface Props {
+  title?: string;
+  class?: string;
+}
+
+const { title = 'terminal', class: className } = Astro.props;
+---
+
+<div class:list={['terminal-window rounded-lg border border-white/10 overflow-hidden shadow-brutal', className]}>
+  <!-- Title bar -->
+  <div class="flex items-center gap-2 px-4 py-2 bg-[var(--color-dark-600)] border-b border-white/10">
+    <div class="flex gap-1.5">
+      <span class="w-3 h-3 rounded-full bg-red-500"></span>
+      <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+      <span class="w-3 h-3 rounded-full bg-green-500"></span>
+    </div>
+    <span class="ml-2 text-xs font-[var(--font-mono)] text-gray-400">{title}</span>
+  </div>
+
+  <!-- Terminal content -->
+  <div class="p-4 font-[var(--font-mono)] text-sm bg-[var(--color-dark-800)] text-[var(--color-terminal-green)]">
+    <slot />
+  </div>
+</div>

@@ -1,0 +1,70 @@
+---
+// Floating code decorations for the hero section
+---
+
+<div class="floating-code-container absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+  <!-- Opening bracket -->
+  <div
+    class="code-element absolute text-6xl font-[var(--font-mono)] text-[var(--color-terminal-cyan)] opacity-20 animate-[float_6s_ease-in-out_infinite]"
+    style="top: 20%; left: 10%;"
+  >
+    {'{'}
+  </div>
+
+  <!-- Closing bracket -->
+  <div
+    class="code-element absolute text-5xl font-[var(--font-mono)] text-[var(--color-terminal-orange)] opacity-20 animate-[float_6s_ease-in-out_infinite]"
+    style="top: 60%; right: 15%; animation-delay: -2s;"
+  >
+    {'}'}
+  </div>
+
+  <!-- HTML tag -->
+  <div
+    class="code-element absolute text-3xl font-[var(--font-mono)] text-[var(--color-terminal-purple)] opacity-20 animate-[float_6s_ease-in-out_infinite]"
+    style="top: 40%; right: 25%; animation-delay: -4s;"
+  >
+    {'</>'}
+  </div>
+
+  <!-- Blinking cursor block -->
+  <div
+    class="code-element absolute w-4 h-6 bg-[var(--color-terminal-green)] opacity-30 animate-[blink_1s_step-end_infinite]"
+    style="top: 35%; left: 30%;"
+  ></div>
+
+  <!-- Binary code -->
+  <div
+    class="code-element absolute font-[var(--font-mono)] text-sm text-[var(--color-terminal-purple)] opacity-15 animate-[float_6s_ease-in-out_infinite]"
+    style="bottom: 30%; left: 15%; animation-delay: -1s;"
+  >
+    101010<br />110011<br />010101
+  </div>
+
+  <!-- JSON block -->
+  <div
+    class="code-element absolute font-[var(--font-mono)] text-xs text-[var(--color-terminal-cyan)] opacity-15 p-2 border border-[var(--color-terminal-cyan)]/30 rounded animate-[float_6s_ease-in-out_infinite]"
+    style="bottom: 25%; right: 10%; animation-delay: -3s;"
+  >
+    {'{'}<br />
+    &nbsp;&nbsp;"developer": true,<br />
+    &nbsp;&nbsp;"coffee": "required"<br />
+    {'}'}
+  </div>
+
+  <!-- Function syntax -->
+  <div
+    class="code-element absolute font-[var(--font-mono)] text-sm text-[var(--color-terminal-green)] opacity-15 animate-[float_6s_ease-in-out_infinite]"
+    style="top: 70%; left: 5%; animation-delay: -5s;"
+  >
+    const build = () =&gt; {'{}'}
+  </div>
+
+  <!-- Array brackets -->
+  <div
+    class="code-element absolute text-4xl font-[var(--font-mono)] text-[var(--color-terminal-pink)] opacity-15 animate-[float_6s_ease-in-out_infinite]"
+    style="top: 15%; right: 35%; animation-delay: -2.5s;"
+  >
+    [ ]
+  </div>
+</div>

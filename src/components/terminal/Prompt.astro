@@ -1,0 +1,19 @@
+---
+import Cursor from './Cursor.astro';
+
+interface Props {
+  path?: string;
+  command?: string;
+  showCursor?: boolean;
+  class?: string;
+}
+
+const { path = '~', command, showCursor = false, class: className } = Astro.props;
+---
+
+<div class:list={['font-[var(--font-mono)] text-[var(--color-terminal-green)] flex items-center gap-2', className]}>
+  <span class="text-[var(--color-terminal-cyan)]">{path}</span>
+  <span class="text-[var(--color-terminal-purple)]">$</span>
+  {command && <span>{command}</span>}
+  {showCursor && <Cursor />}
+</div>

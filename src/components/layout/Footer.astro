@@ -1,0 +1,51 @@
+---
+import { siteConfig } from '../../data/site';
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-white/5 bg-[var(--color-dark-800)]">
+  <div class="container mx-auto px-6 py-12">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+      <!-- Left side - Name and tagline -->
+      <div class="text-center md:text-left">
+        <div class="font-[var(--font-mono)] text-[var(--color-terminal-green)] mb-2">
+          <span class="text-[var(--color-terminal-cyan)]">$</span> echo "Thanks for visiting!"
+        </div>
+        <p class="text-gray-500 text-sm">
+          {siteConfig.author} &copy; {currentYear}
+        </p>
+      </div>
+
+      <!-- Social links -->
+      <div class="flex items-center gap-4">
+        {siteConfig.social.map((item) => (
+          <a
+            href={item.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="p-3 border border-white/10 rounded-lg hover:border-[var(--color-terminal-green)] hover:text-[var(--color-terminal-green)] transition-all hover:glow-green text-gray-400"
+            aria-label={item.name}
+          >
+            <Fragment set:html={item.icon} />
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="mt-8 pt-8 border-t border-white/5 text-center">
+      <p class="font-[var(--font-mono)] text-xs text-gray-600">
+        <span class="text-[var(--color-terminal-purple)]">// </span>
+        Built with Astro + Tailwind
+        <span class="text-[var(--color-terminal-purple)]"> | </span>
+        <a
+          href="https://github.com/adamdavies1915/adamdavies1915.github.io"
+          class="text-[var(--color-terminal-cyan)] hover:text-[var(--color-terminal-green)] transition-colors"
+        >
+          View source
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>

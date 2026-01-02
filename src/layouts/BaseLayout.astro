@@ -1,0 +1,82 @@
+---
+import '../styles/global.css';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import { siteConfig } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = siteConfig.title,
+  description = siteConfig.description,
+} = Astro.props;
+
+const fullTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.title}`;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>{fullTitle}</title>
+
+    <!-- Theme script (prevents flash) -->
+    <script is:inline>
+      const theme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    </script>
+  </head>
+  <body class="min-h-screen">
+    <!-- Scanlines overlay -->
+    <div class="scanlines" aria-hidden="true"></div>
+
+    <Header />
+
+    <main>
+      <slot />
+    </main>
+
+    <Footer />
+
+    <!-- Page load animation -->
+    <script>
+      document.body.classList.add('loaded');
+
+      // Scroll animation observer
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+
+      document.querySelectorAll('.animate-on-scroll').forEach((el) => {
+        // Check if element is already in viewport on page load
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('visible');
+        }
+        observer.observe(el);
+      });
+    </script>
+  </body>
+</html>

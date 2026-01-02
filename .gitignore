@@ -1,8 +1,26 @@
-_site
-.sass-cache
-.jekyll-metadata
-*.DS_Store
-Gemfile.lock
-.jekyll-cache
-vendor/
-.bundle/
+# build output
+dist/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# environment variables
+.env
+.env.production
+
+# astro
+.astro/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

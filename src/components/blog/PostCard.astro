@@ -1,0 +1,67 @@
+---
+import Card from '../ui/Card.astro';
+
+interface Props {
+  post: any;
+}
+
+const { post } = Astro.props;
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+---
+
+<article class="group">
+  <Card href={`/blog/${post.slug}`}>
+    <!-- Image -->
+    {post.data.image && (
+      <div class="aspect-video overflow-hidden">
+        <img
+          src={post.data.image}
+          alt={post.data.title}
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      </div>
+    )}
+
+    <!-- Content -->
+    <div class="p-6">
+      <!-- Date -->
+      <p class="font-[var(--font-mono)] text-xs text-[var(--color-terminal-cyan)] mb-2">
+        <span class="text-[var(--color-terminal-purple)]">&gt;</span>
+        {formatDate(post.data.date)}
+      </p>
+
+      <!-- Title -->
+      <h3 class="font-[var(--font-display)] text-xl font-bold text-gray-100 mb-3 group-hover:text-[var(--color-terminal-green)] transition-colors">
+        {post.data.title}
+      </h3>
+
+      <!-- Excerpt -->
+      <p class="text-gray-400 text-sm line-clamp-3">
+        {post.data.subtitle || post.body?.slice(0, 150) + '...'}
+      </p>
+
+      <!-- Tags -->
+      {post.data.tags && (
+        <div class="flex flex-wrap gap-2 mt-4">
+          {post.data.tags.slice(0, 3).map((tag: string) => (
+            <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-purple)] rounded">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <!-- Read more indicator -->
+      <div class="mt-4 font-[var(--font-mono)] text-sm text-[var(--color-terminal-green)] opacity-0 group-hover:opacity-100 transition-opacity">
+        $ cat post.md <span class="animate-[blink_1s_step-end_infinite]">_</span>
+      </div>
+    </div>
+  </Card>
+</article>

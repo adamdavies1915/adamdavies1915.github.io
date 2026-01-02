@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import TerminalWindow from '../components/terminal/TerminalWindow.astro';
+import Prompt from '../components/terminal/Prompt.astro';
+import { siteConfig } from '../data/site';
+---
+
+<BaseLayout title="About" description="Learn more about Adam Davies - Full Stack Software Engineer">
+  <!-- Page header -->
+  <section class="pt-32 pb-16 relative">
+    <div class="container mx-auto px-6">
+      <Prompt path="~/about" command="cat README.md" />
+      <h1 class="font-[var(--font-display)] text-5xl font-bold text-gray-100 mt-4">
+        About <span class="text-[var(--color-terminal-green)]">Me</span>
+      </h1>
+    </div>
+  </section>
+
+  <!-- Main content -->
+  <section class="pb-24">
+    <div class="container mx-auto px-6">
+      <div class="grid lg:grid-cols-3 gap-12">
+        <!-- Bio column -->
+        <div class="lg:col-span-2 space-y-8">
+          <div class="prose prose-lg prose-invert max-w-none animate-on-scroll">
+            {siteConfig.aboutContent.split('\n\n').map((paragraph) => (
+              <p class="text-gray-300 leading-relaxed">{paragraph}</p>
+            ))}
+          </div>
+
+          <!-- Experience timeline -->
+          <div class="animate-on-scroll" style="animation-delay: 0.2s;">
+            <TerminalWindow title="experience.log">
+              <div class="space-y-4">
+                {siteConfig.experience.map((exp, i) => (
+                  <div class="flex gap-4">
+                    <span class="text-[var(--color-terminal-purple)]">[{i + 1}]</span>
+                    <div>
+                      <p class="text-[var(--color-terminal-green)]">{exp.name}</p>
+                      <p class="text-[var(--color-terminal-orange)] text-sm">{exp.organization}</p>
+                      <p class="text-gray-500 text-xs">{exp.date}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TerminalWindow>
+          </div>
+
+          <!-- Education -->
+          <div class="animate-on-scroll" style="animation-delay: 0.3s;">
+            <TerminalWindow title="education.log">
+              <div class="space-y-4">
+                {siteConfig.education.map((edu, i) => (
+                  <div class="flex gap-4">
+                    <span class="text-[var(--color-terminal-cyan)]">[{i + 1}]</span>
+                    <div>
+                      <p class="text-[var(--color-terminal-green)]">{edu.name}</p>
+                      <p class="text-[var(--color-terminal-orange)] text-sm">{edu.organization}</p>
+                      <p class="text-gray-500 text-xs">{edu.date}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TerminalWindow>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <!-- Photo -->
+          <div class="relative animate-on-scroll">
+            <div class="absolute inset-0 border-3 border-[var(--color-terminal-green)] translate-x-3 translate-y-3"></div>
+            <img
+              src="/images/about/author.jpg"
+              alt="Adam Davies"
+              class="relative z-10 w-full rounded-lg"
+            />
+          </div>
+
+          <!-- CV Download -->
+          <div class="animate-on-scroll" style="animation-delay: 0.1s;">
+            <Button href="/cv.pdf" variant="primary" class="w-full" external>
+              Download CV
+            </Button>
+          </div>
+
+          <!-- Skills -->
+          <div class="animate-on-scroll" style="animation-delay: 0.2s;">
+            <TerminalWindow title="skills.sh">
+              <div class="space-y-3">
+                {siteConfig.skills.map((skill) => (
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-[var(--color-terminal-cyan)]">{skill.name}</span>
+                      <span class="text-[var(--color-terminal-green)]">{skill.value}%</span>
+                    </div>
+                    <div class="h-2 bg-[var(--color-dark-600)] rounded overflow-hidden">
+                      <div
+                        class="h-full rounded transition-all duration-500"
+                        style={`width: ${skill.value}%; background-color: ${skill.color};`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TerminalWindow>
+          </div>
+
+          <!-- Contact -->
+          <div class="animate-on-scroll" style="animation-delay: 0.3s;">
+            <TerminalWindow title="contact.sh">
+              <div class="space-y-2 text-sm">
+                <p>
+                  <span class="text-[var(--color-terminal-purple)]">$</span> echo $EMAIL
+                </p>
+                <p class="text-[var(--color-terminal-cyan)]">{siteConfig.email}</p>
+                <p class="mt-3">
+                  <span class="text-[var(--color-terminal-purple)]">$</span> echo $LOCATION
+                </p>
+                <p class="text-[var(--color-terminal-cyan)]">{siteConfig.location}</p>
+              </div>
+            </TerminalWindow>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

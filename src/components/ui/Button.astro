@@ -1,0 +1,48 @@
+---
+interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'terminal';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  class?: string;
+  external?: boolean;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  class: className,
+  external = false,
+} = Astro.props;
+
+const baseStyles =
+  'font-[var(--font-mono)] uppercase tracking-wider transition-all duration-200 border-3 relative inline-flex items-center justify-center';
+
+const variants = {
+  primary:
+    'bg-[var(--color-terminal-green)] text-[var(--color-dark-900)] border-[var(--color-terminal-green)] hover:shadow-brutal-green hover:-translate-x-1 hover:-translate-y-1 font-medium',
+  secondary:
+    'bg-transparent text-[var(--color-terminal-cyan)] border-[var(--color-terminal-cyan)] hover:bg-[var(--color-terminal-cyan)] hover:text-[var(--color-dark-900)]',
+  ghost:
+    'bg-transparent text-[var(--color-terminal-purple)] border-transparent hover:border-[var(--color-terminal-purple)]',
+  terminal:
+    'bg-[var(--color-dark-700)] text-[var(--color-terminal-green)] border-[var(--color-terminal-green)]/50 hover:border-[var(--color-terminal-green)] hover:shadow-brutal-green hover:-translate-x-1 hover:-translate-y-1',
+};
+
+const sizes = {
+  sm: 'px-4 py-2 text-xs',
+  md: 'px-6 py-3 text-sm',
+  lg: 'px-8 py-4 text-base',
+};
+
+const Element = href ? 'a' : 'button';
+const externalProps = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+<Element
+  href={href}
+  class:list={[baseStyles, variants[variant], sizes[size], className]}
+  {...externalProps}
+>
+  <slot />
+</Element>

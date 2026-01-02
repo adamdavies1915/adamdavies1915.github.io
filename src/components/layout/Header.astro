@@ -1,0 +1,109 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import { siteConfig } from '../../data/site';
+
+const currentPath = Astro.url.pathname;
+---
+
+<header
+  id="header"
+  class="fixed top-0 left-0 right-0 z-40 bg-[var(--color-dark-900)]/80 backdrop-blur-md border-b border-white/5 transition-all duration-300"
+>
+  <nav class="container mx-auto px-6 py-4 flex items-center justify-between">
+    <!-- Logo / Name -->
+    <a href="/" class="flex items-center gap-2 group">
+      <span class="text-[var(--color-terminal-green)] font-[var(--font-mono)]">$</span>
+      <span class="font-[var(--font-display)] font-bold text-xl group-hover:text-[var(--color-terminal-green)] transition-colors">
+        {siteConfig.title.toLowerCase().replace(' ', '-')}
+      </span>
+    </a>
+
+    <!-- Navigation -->
+    <div class="flex items-center gap-8">
+      <ul class="hidden md:flex items-center gap-6">
+        {siteConfig.navigation.map((item) => {
+          const isActive = currentPath === item.link || currentPath.startsWith(item.link + '/');
+          return (
+            <li>
+              <a
+                href={item.link}
+                class:list={[
+                  'font-[var(--font-mono)] text-sm transition-colors relative group',
+                  isActive
+                    ? 'text-[var(--color-terminal-green)]'
+                    : 'text-gray-400 hover:text-[var(--color-terminal-green)]',
+                ]}
+              >
+                <span class="text-[var(--color-terminal-cyan)] opacity-0 group-hover:opacity-100 transition-opacity">
+                  ./
+                </span>
+                {item.name}
+                {isActive && (
+                  <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-[var(--color-terminal-green)]" />
+                )}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+
+      <ThemeToggle />
+
+      <!-- Mobile menu button -->
+      <button
+        id="mobile-menu-btn"
+        class="md:hidden p-2 text-gray-400 hover:text-[var(--color-terminal-green)] transition-colors"
+        aria-label="Toggle menu"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div
+    id="mobile-menu"
+    class="hidden md:hidden border-t border-white/5 bg-[var(--color-dark-900)]/95 backdrop-blur-md"
+  >
+    <ul class="container mx-auto px-6 py-4 space-y-4">
+      {siteConfig.navigation.map((item) => {
+        const isActive = currentPath === item.link || currentPath.startsWith(item.link + '/');
+        return (
+          <li>
+            <a
+              href={item.link}
+              class:list={[
+                'block font-[var(--font-mono)] text-lg',
+                isActive ? 'text-[var(--color-terminal-green)]' : 'text-gray-400',
+              ]}
+            >
+              <span class="text-[var(--color-terminal-cyan)]">./</span>
+              {item.name}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</header>
+
+<script>
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  mobileMenuBtn?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+
+  // Add background on scroll
+  const header = document.getElementById('header');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      header?.classList.add('bg-[var(--color-dark-900)]');
+    } else {
+      header?.classList.remove('bg-[var(--color-dark-900)]');
+    }
+  });
+</script>

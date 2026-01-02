@@ -1,0 +1,15 @@
+---
+interface Props {
+  intensity?: 'light' | 'medium' | 'heavy';
+}
+
+const { intensity = 'light' } = Astro.props;
+
+const opacities = {
+  light: 'opacity-50',
+  medium: 'opacity-70',
+  heavy: 'opacity-90',
+};
+---
+
+<div class:list={['scanlines', opacities[intensity]]} aria-hidden="true"></div>

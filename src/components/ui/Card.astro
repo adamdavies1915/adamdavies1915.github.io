@@ -1,0 +1,23 @@
+---
+interface Props {
+  href?: string;
+  class?: string;
+  hover?: boolean;
+}
+
+const { href, class: className, hover = true } = Astro.props;
+
+const Element = href ? 'a' : 'div';
+---
+
+<Element
+  href={href}
+  class:list={[
+    'block border-3 border-white/10 bg-[var(--color-dark-800)] overflow-hidden transition-all duration-300',
+    hover && 'hover:border-[var(--color-terminal-green)] hover:shadow-brutal-green hover:-translate-x-1 hover:-translate-y-1',
+    href && 'cursor-pointer',
+    className,
+  ]}
+>
+  <slot />
+</Element>

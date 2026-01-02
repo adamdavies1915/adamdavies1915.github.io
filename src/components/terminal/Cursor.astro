@@ -1,0 +1,15 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<span
+  class:list={[
+    'inline-block w-2.5 h-5 bg-[var(--color-terminal-green)] ml-0.5 animate-[blink_1s_step-end_infinite]',
+    className,
+  ]}
+  aria-hidden="true"
+></span>

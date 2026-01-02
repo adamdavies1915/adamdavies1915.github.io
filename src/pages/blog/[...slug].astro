@@ -1,0 +1,108 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Prompt from '../../components/terminal/Prompt.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+---
+
+<BaseLayout title={post.data.title} description={post.data.subtitle}>
+  <!-- Page header -->
+  <section class="pt-32 pb-8 relative overflow-hidden">
+    <div class="container mx-auto px-6">
+      <div class="max-w-3xl mx-auto">
+        <!-- Breadcrumb -->
+        <Prompt path="~/blog" command={`cat ${post.slug}.md`} />
+
+        <!-- Title -->
+        <h1 class="font-[var(--font-display)] text-4xl md:text-5xl font-bold text-gray-100 mt-6 mb-4">
+          {post.data.title}
+        </h1>
+
+        <!-- Subtitle -->
+        {post.data.subtitle && (
+          <p class="text-xl text-gray-400 mb-6">{post.data.subtitle}</p>
+        )}
+
+        <!-- Meta -->
+        <div class="flex flex-wrap items-center gap-4 font-[var(--font-mono)] text-sm">
+          <span class="text-[var(--color-terminal-purple)]">{formatDate(post.data.date)}</span>
+          <span class="text-gray-600">|</span>
+          <span class="text-[var(--color-terminal-cyan)]">{post.data.author}</span>
+        </div>
+
+        <!-- Tags -->
+        {post.data.tags && (
+          <div class="flex flex-wrap gap-2 mt-4">
+            {post.data.tags.map((tag: string) => (
+              <span class="font-[var(--font-mono)] text-xs px-3 py-1 border border-[var(--color-terminal-purple)]/50 text-[var(--color-terminal-purple)] rounded-full">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured image -->
+  {post.data.image && (
+    <section class="pb-8">
+      <div class="container mx-auto px-6">
+        <div class="max-w-4xl mx-auto">
+          <div class="relative">
+            <div class="absolute inset-0 border-3 border-[var(--color-terminal-green)] translate-x-4 translate-y-4 hidden md:block rounded-lg"></div>
+            <img
+              src={post.data.image}
+              alt={post.data.title}
+              class="relative z-10 w-full rounded-lg"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Content -->
+  <section class="pb-24">
+    <div class="container mx-auto px-6">
+      <article class="max-w-3xl mx-auto prose prose-lg prose-invert prose-terminal">
+        <Content />
+      </article>
+    </div>
+  </section>
+
+  <!-- Back link -->
+  <section class="pb-12">
+    <div class="container mx-auto px-6">
+      <div class="max-w-3xl mx-auto">
+        <a
+          href="/blog"
+          class="font-[var(--font-mono)] text-[var(--color-terminal-cyan)] hover:text-[var(--color-terminal-green)] transition-colors inline-flex items-center gap-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          cd ../blog
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
