@@ -124,13 +124,20 @@ export async function fetchGitHubProjects(
             cleanSummary = lines.slice(1).join('\n').trim();
           }
 
-          // Extract URL from summary (look for markdown link or bare URL)
+          // Extract URL from summary (look for various formats)
           if (cleanSummary) {
-            // Match markdown links like [text](url) or bare URLs
+            // Match **Live:** https://... or **Demo:** https://... format
+            const boldLinkMatch = cleanSummary.match(/\*\*(?:live|demo|website|link|url|visit|view)[:\s]*\*\*\s*(https?:\/\/[^\s]+)/i);
+            // Match [text](url) markdown links
             const markdownLinkMatch = cleanSummary.match(/\[(?:live|demo|website|link|visit|view)[^\]]*\]\((https?:\/\/[^\)]+)\)/i);
+            // Match bare URLs (not github.com)
             const bareLinkMatch = cleanSummary.match(/(?:^|\s)(https?:\/\/(?!github\.com)[^\s]+)/m);
 
-            if (markdownLinkMatch) {
+            if (boldLinkMatch) {
+              liveUrl = boldLinkMatch[1];
+              // Remove the whole line with the bold link
+              cleanSummary = cleanSummary.replace(/\*\*(?:live|demo|website|link|url|visit|view)[:\s]*\*\*\s*https?:\/\/[^\s]+\n?/i, '').trim();
+            } else if (markdownLinkMatch) {
               liveUrl = markdownLinkMatch[1];
               // Remove the markdown link from summary
               cleanSummary = cleanSummary.replace(markdownLinkMatch[0], '').trim();
