@@ -25,7 +25,7 @@ const { projects } = Astro.props;
     <div class="grid md:grid-cols-2 gap-8">
       {projects.map((project, i) => (
         <div class="animate-on-scroll" style={`animation-delay: ${i * 0.1}s;`}>
-          <Card href={project.github}>
+          <Card href={project.liveUrl || project.github}>
             <div class="p-6">
               <!-- Project icon/emoji -->
               {project.emoji && (

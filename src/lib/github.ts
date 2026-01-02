@@ -13,7 +13,7 @@ export interface GitHubProject {
   title: string;
   description: string;
   emoji: string;
-  link: string;
+  liveUrl: string | null;
   github: string;
   tags: string[];
   summary: string | null;
@@ -96,28 +96,60 @@ export async function fetchGitHubProjects(
           console.log(`No summary.md for ${repo.name}`);
         }
 
-        // Parse title from summary.md if it starts with a heading
+        // Parse title, emoji, and URL from summary.md
         let title = repo.name.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
         let cleanSummary = summary;
+        let emoji = getEmojiForLanguage(repo.language);
+        let liveUrl: string | null = null;
 
         if (summary) {
           const lines = summary.trim().split('\n');
-          const firstLine = lines[0].trim();
+          let firstLine = lines[0].trim();
 
           // Check if first line is a markdown heading (# Title or ## Title)
           const headingMatch = firstLine.match(/^#{1,2}\s+(.+)$/);
           if (headingMatch) {
-            title = headingMatch[1].trim();
+            let titleText = headingMatch[1].trim();
+
+            // Extract emoji from title (at start or end)
+            const emojiRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)\s*|\s*(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)$/gu;
+            const emojiMatch = titleText.match(emojiRegex);
+            if (emojiMatch) {
+              emoji = emojiMatch[0].trim();
+              titleText = titleText.replace(emojiRegex, '').trim();
+            }
+
+            title = titleText;
             // Remove the title line from the summary
             cleanSummary = lines.slice(1).join('\n').trim();
+          }
+
+          // Extract URL from summary (look for markdown link or bare URL)
+          if (cleanSummary) {
+            // Match markdown links like [text](url) or bare URLs
+            const markdownLinkMatch = cleanSummary.match(/\[(?:live|demo|website|link|visit|view)[^\]]*\]\((https?:\/\/[^\)]+)\)/i);
+            const bareLinkMatch = cleanSummary.match(/(?:^|\s)(https?:\/\/(?!github\.com)[^\s]+)/m);
+
+            if (markdownLinkMatch) {
+              liveUrl = markdownLinkMatch[1];
+              // Remove the markdown link from summary
+              cleanSummary = cleanSummary.replace(markdownLinkMatch[0], '').trim();
+            } else if (bareLinkMatch) {
+              liveUrl = bareLinkMatch[1];
+              // Remove the bare URL from summary
+              cleanSummary = cleanSummary.replace(bareLinkMatch[1], '').trim();
+            }
+
+            // Clean up any leftover empty lines
+            cleanSummary = cleanSummary.replace(/\n{3,}/g, '\n\n').trim();
           }
         }
 
         return {
           title,
           description: repo.description || 'No description available',
-          emoji: getEmojiForLanguage(repo.language),
-          link: repo.html_url,
+          emoji,
+          liveUrl,
           github: repo.html_url,
           tags: [repo.language, ...repo.topics.filter(t => t !== topic)].filter(Boolean) as string[],
           summary: cleanSummary,
