@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Prompt from '../../components/terminal/Prompt.astro';
 
@@ -69,7 +70,7 @@ function formatDate(date: Date): string {
         <div class="max-w-4xl mx-auto">
           <div class="relative">
             <div class="absolute inset-0 border-3 border-[var(--color-terminal-green)] translate-x-4 translate-y-4 hidden md:block rounded-lg"></div>
-            <img
+            <Image
               src={post.data.image}
               alt={post.data.title}
               class="relative z-10 w-full rounded-lg"
