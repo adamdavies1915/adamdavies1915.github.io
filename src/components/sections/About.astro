@@ -1,7 +1,9 @@
 ---
+import { Image } from 'astro:assets';
 import Button from '../ui/Button.astro';
 import TerminalWindow from '../terminal/TerminalWindow.astro';
 import { siteConfig } from '../../data/site';
+import authorImage from '../../assets/images/author.jpg';
 ---
 
 <section class="py-24 relative">
@@ -27,8 +29,8 @@ import { siteConfig } from '../../data/site';
       <!-- Right: Image with brutalist frame -->
       <div class="relative animate-on-scroll" style="animation-delay: 0.2s;">
         <div class="absolute inset-0 border-3 border-[var(--color-terminal-cyan)] translate-x-4 translate-y-4 hidden md:block"></div>
-        <img
-          src="/images/about/author.jpg"
+        <Image
+          src={authorImage}
           alt="Adam Davies"
           class="relative z-10 w-full grayscale hover:grayscale-0 transition-all duration-500 rounded-lg"
         />
