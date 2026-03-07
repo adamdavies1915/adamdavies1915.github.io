@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/sections/Hero.astro';
-import About from '../components/sections/About.astro';
 import BlogPreview from '../components/sections/BlogPreview.astro';
 import ProjectsPreview from '../components/sections/ProjectsPreview.astro';
 import { getCollection } from 'astro:content';
@@ -18,7 +17,6 @@ const projects = await fetchGitHubProjects('adamdavies1915', 'sideproject');
 
 <BaseLayout>
   <Hero />
-  <About />
   <ProjectsPreview projects={projects.slice(0, 4)} />
   <BlogPreview posts={recentPosts} />
 </BaseLayout>

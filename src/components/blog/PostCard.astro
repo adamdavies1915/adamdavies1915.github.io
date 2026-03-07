@@ -34,7 +34,6 @@ function formatDate(date: Date): string {
     <div class="p-6">
       <!-- Date -->
       <p class="font-[var(--font-mono)] text-xs text-[var(--color-terminal-cyan)] mb-2">
-        <span class="text-[var(--color-terminal-purple)]">&gt;</span>
         {formatDate(post.data.date)}
       </p>
 
@@ -52,17 +51,12 @@ function formatDate(date: Date): string {
       {post.data.tags && (
         <div class="flex flex-wrap gap-2 mt-4">
           {post.data.tags.slice(0, 3).map((tag: string) => (
-            <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-purple)] rounded">
+            <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-cyan)]">
               #{tag}
             </span>
           ))}
         </div>
       )}
-
-      <!-- Read more indicator -->
-      <div class="mt-4 font-[var(--font-mono)] text-sm text-[var(--color-terminal-green)] opacity-0 group-hover:opacity-100 transition-opacity">
-        $ cat post.md <span class="animate-[blink_1s_step-end_infinite]">_</span>
-      </div>
     </div>
   </Card>
 </article>

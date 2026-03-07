@@ -6,17 +6,11 @@ export const siteConfig = {
   email: 'adam@bath.edu',
   location: 'New Orleans, Louisiana, USA',
 
-  bio: 'Experienced full stack software engineer with 8+ years building scalable, production-ready systems across fintech, insurtech, and hospitality tech sectors. Specialized in Java and Node.js backends and React frontends with a proven track record of delivering both critical infrastructure and innovative features.',
-
   blurb: 'Experienced full stack software engineer with 8+ years building scalable, production-ready systems across fintech, insurtech, and hospitality tech sectors.',
 
-  aboutContent: `Experienced full stack software engineer with 8+ years building scalable, production-ready systems across fintech, insurtech, and hospitality tech sectors. Specialized in Java and Node.js backends and React frontends with a proven track record of delivering both critical infrastructure and innovative features.
+  aboutContent: `
 
-Currently based in New Orleans, Louisiana, I embrace modern development practices including LLM-assisted workflows while maintaining strong manual coding expertise. I thrive in collaborative agile environments, adept at translating complex requirements into elegant technical solutions.
-
-My experience spans from building regulatory compliance systems at Morgan Stanley and Valstro, to developing insurance underwriting platforms at Ki Insurance, and creating digital ordering solutions at PepperHQ. I have a particular passion for backend architecture, API design, and creating systems that scale.
-
-When I'm not coding, you'll find me cycling through New Orleans, kayaking the bayous, or planning my next adventure. I'm also a board member of Bike Easy, a local bicycle advocacy group promoting sustainable transportation and safer streets in our community.`,
+When I'm not coding, you'll find me cycling through New Orleans, kayaking the bayous, or planning my next adventure. I'm  a board member of Bike Easy, a local bicycle advocacy group promoting sustainable transportation and safer streets in our community.`,
 
   navigation: [
     { name: 'about', link: '/about' },
@@ -43,10 +37,10 @@ When I'm not coding, you'll find me cycling through New Orleans, kayaking the ba
   ],
 
   skills: [
-    { name: 'Java/Kotlin', color: '#fdb157', value: 95 },
-    { name: 'JavaScript/TypeScript', color: '#9473e6', value: 90 },
-    { name: 'React/Node.js', color: '#2bfdff', value: 85 },
-    { name: 'Cloud/DevOps', color: '#00ff9f', value: 80 },
+    { name: 'Java/Kotlin', color: '#00ff9f' },
+    { name: 'JavaScript/TypeScript', color: '#2bfdff' },
+    { name: 'React/Node.js', color: '#00ff9f' },
+    { name: 'Cloud/DevOps', color: '#2bfdff' },
   ],
 
   experience: [

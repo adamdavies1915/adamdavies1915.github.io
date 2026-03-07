@@ -3,7 +3,7 @@
 
 /* Design Tokens - Neo-brutalist Terminal Theme */
 @theme {
-  /* Colors - Dark backgrounds with vibrant accents */
+  /* Colors */
   --color-dark-900: #0a0a0f;
   --color-dark-800: #12121a;
   --color-dark-700: #161622;
@@ -11,10 +11,6 @@
 
   --color-terminal-green: #00ff9f;
   --color-terminal-cyan: #2bfdff;
-  --color-terminal-purple: #9473e6;
-  --color-terminal-orange: #fdb157;
-  --color-terminal-pink: #ff6b9d;
-  --color-terminal-yellow: #ffd93d;
 
   /* Typography */
   --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', ui-monospace, monospace;
@@ -22,32 +18,10 @@
   --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
 
   /* Animations */
-  --animate-blink: blink 1s step-end infinite;
-  --animate-float: float 6s ease-in-out infinite;
-  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
   --animate-fade-in: fade-in 0.5s ease-out forwards;
   --animate-slide-up: slide-up 0.6s ease-out forwards;
 
   /* Keyframes */
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-  }
-
-  @keyframes pulse-glow {
-    0%, 100% {
-      box-shadow: 0 0 5px var(--color-terminal-green), 0 0 10px var(--color-terminal-green);
-    }
-    50% {
-      box-shadow: 0 0 20px var(--color-terminal-green), 0 0 30px var(--color-terminal-green);
-    }
-  }
-
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -63,22 +37,6 @@
       transform: translateY(0);
     }
   }
-
-  @keyframes glitch-1 {
-    0%, 100% { transform: translate(0); }
-    20% { transform: translate(-2px, 2px); }
-    40% { transform: translate(2px, -2px); }
-    60% { transform: translate(-2px, -2px); }
-    80% { transform: translate(2px, 2px); }
-  }
-
-  @keyframes glitch-2 {
-    0%, 100% { transform: translate(0); }
-    20% { transform: translate(2px, -2px); }
-    40% { transform: translate(-2px, 2px); }
-    60% { transform: translate(2px, 2px); }
-    80% { transform: translate(-2px, -2px); }
-  }
 }
 
 /* Base styles */
@@ -90,6 +48,46 @@ body {
   @apply antialiased;
   background-color: var(--color-dark-900);
   color: #f0f0f0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light theme overrides */
+[data-theme="light"] {
+  --color-dark-900: #f8f9fa;
+  --color-dark-800: #e9ecef;
+  --color-dark-700: #dee2e6;
+  --color-dark-600: #ced4da;
+
+  --color-terminal-green: #00875a;
+  --color-terminal-cyan: #0891b2;
+}
+
+[data-theme="light"] body {
+  color: #1a1a2e;
+}
+
+[data-theme="light"] ::selection {
+  background-color: color-mix(in srgb, var(--color-terminal-green) 20%, transparent);
+}
+
+[data-theme="light"] .text-gray-100 {
+  color: #1f2937;
+}
+
+[data-theme="light"] .text-gray-400 {
+  color: #4b5563;
+}
+
+[data-theme="light"] .text-gray-500 {
+  color: #6b7280;
+}
+
+[data-theme="light"] .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 /* Selection styling */
@@ -109,11 +107,10 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-dark-600);
-  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-terminal-purple);
+  background: var(--color-terminal-green);
 }
 
 /* Custom utilities */
@@ -122,81 +119,13 @@ body {
     border-width: 3px;
   }
 
-  .text-glow {
-    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
-  }
-
   .shadow-brutal {
-    box-shadow: 4px 4px 0 var(--color-terminal-purple);
-  }
-
-  .shadow-brutal-hover {
-    box-shadow: 6px 6px 0 var(--color-terminal-cyan);
+    box-shadow: 4px 4px 0 var(--color-terminal-green);
   }
 
   .shadow-brutal-green {
     box-shadow: 4px 4px 0 var(--color-terminal-green);
   }
-
-  .glow-green {
-    box-shadow: 0 0 20px color-mix(in srgb, var(--color-terminal-green) 50%, transparent);
-  }
-
-  .glow-cyan {
-    box-shadow: 0 0 20px color-mix(in srgb, var(--color-terminal-cyan) 50%, transparent);
-  }
-}
-
-/* Scanlines effect */
-.scanlines {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 50;
-  background: repeating-linear-gradient(
-    0deg,
-    color-mix(in srgb, var(--color-terminal-green) 3%, transparent) 0px,
-    color-mix(in srgb, var(--color-terminal-green) 3%, transparent) 1px,
-    transparent 1px,
-    transparent 2px
-  );
-  opacity: 0.5;
-}
-
-/* Glitch effect for text */
-.glitch {
-  position: relative;
-  display: inline-block;
-}
-
-.glitch::before,
-.glitch::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.glitch::before {
-  color: var(--color-terminal-cyan);
-  animation: glitch-1 2s infinite linear alternate-reverse;
-  clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
-}
-
-.glitch::after {
-  color: var(--color-terminal-pink);
-  animation: glitch-2 2s infinite linear alternate-reverse;
-  clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
-}
-
-/* Grid background pattern */
-.grid-bg {
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--color-terminal-green) 3%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--color-terminal-green) 3%, transparent) 1px, transparent 1px);
-  background-size: 50px 50px;
 }
 
 /* Prose customization for blog posts */
@@ -204,13 +133,12 @@ body {
   --tw-prose-body: #d1d5db;
   --tw-prose-headings: var(--color-terminal-green);
   --tw-prose-links: var(--color-terminal-cyan);
-  --tw-prose-code: var(--color-terminal-orange);
+  --tw-prose-code: var(--color-terminal-cyan);
 }
 
 .prose-terminal code {
   background-color: var(--color-dark-700);
   padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
 }
 
 .prose-terminal pre {
@@ -228,16 +156,31 @@ body {
   border-bottom-color: var(--color-terminal-green);
 }
 
+/* Light theme prose adjustments */
+[data-theme="light"] .prose-terminal {
+  --tw-prose-body: #374151;
+  --tw-prose-headings: var(--color-terminal-green);
+  --tw-prose-links: var(--color-terminal-cyan);
+  --tw-prose-code: var(--color-terminal-cyan);
+}
+
+[data-theme="light"] .prose-terminal code {
+  background-color: var(--color-dark-700);
+}
+
+[data-theme="light"] .prose-terminal pre {
+  background-color: #1e1e2e !important;
+  color: #f0f0f0;
+}
+
 /* Animation on scroll - default hidden state */
 .animate-on-scroll {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition: opacity 0.6s ease-out;
 }
 
 .animate-on-scroll.visible {
   opacity: 1;
-  transform: translateY(0);
 }
 
 /* Page load animation */

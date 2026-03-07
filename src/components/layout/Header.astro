@@ -7,15 +7,12 @@ const currentPath = Astro.url.pathname;
 
 <header
   id="header"
-  class="fixed top-0 left-0 right-0 z-40 bg-[var(--color-dark-900)]/80 backdrop-blur-md border-b border-white/5 transition-all duration-300"
+  class="fixed top-0 left-0 right-0 z-40 bg-[var(--color-dark-900)] border-b border-white/5 transition-all duration-300"
 >
   <nav class="container mx-auto px-6 py-4 flex items-center justify-between">
     <!-- Logo / Name -->
-    <a href="/" class="flex items-center gap-2 group">
-      <span class="text-[var(--color-terminal-green)] font-[var(--font-mono)]">$</span>
-      <span class="font-[var(--font-display)] font-bold text-xl group-hover:text-[var(--color-terminal-green)] transition-colors">
-        {siteConfig.title.toLowerCase().replace(' ', '-')}
-      </span>
+    <a href="/" class="font-[var(--font-display)] font-bold text-xl hover:text-[var(--color-terminal-green)] transition-colors">
+      {siteConfig.title.toLowerCase().replace(' ', '-')}
     </a>
 
     <!-- Navigation -->
@@ -28,15 +25,12 @@ const currentPath = Astro.url.pathname;
               <a
                 href={item.link}
                 class:list={[
-                  'font-[var(--font-mono)] text-sm transition-colors relative group',
+                  'font-[var(--font-mono)] text-sm transition-colors relative',
                   isActive
                     ? 'text-[var(--color-terminal-green)]'
                     : 'text-gray-400 hover:text-[var(--color-terminal-green)]',
                 ]}
               >
-                <span class="text-[var(--color-terminal-cyan)] opacity-0 group-hover:opacity-100 transition-opacity">
-                  ./
-                </span>
                 {item.name}
                 {isActive && (
                   <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-[var(--color-terminal-green)]" />
@@ -65,7 +59,7 @@ const currentPath = Astro.url.pathname;
   <!-- Mobile menu -->
   <div
     id="mobile-menu"
-    class="hidden md:hidden border-t border-white/5 bg-[var(--color-dark-900)]/95 backdrop-blur-md"
+    class="hidden md:hidden border-t border-white/5 bg-[var(--color-dark-900)]"
   >
     <ul class="container mx-auto px-6 py-4 space-y-4">
       {siteConfig.navigation.map((item) => {
@@ -79,7 +73,6 @@ const currentPath = Astro.url.pathname;
                 isActive ? 'text-[var(--color-terminal-green)]' : 'text-gray-400',
               ]}
             >
-              <span class="text-[var(--color-terminal-cyan)]">./</span>
               {item.name}
             </a>
           </li>
@@ -95,15 +88,5 @@ const currentPath = Astro.url.pathname;
 
   mobileMenuBtn?.addEventListener('click', () => {
     mobileMenu?.classList.toggle('hidden');
-  });
-
-  // Add background on scroll
-  const header = document.getElementById('header');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      header?.classList.add('bg-[var(--color-dark-900)]');
-    } else {
-      header?.classList.remove('bg-[var(--color-dark-900)]');
-    }
   });
 </script>

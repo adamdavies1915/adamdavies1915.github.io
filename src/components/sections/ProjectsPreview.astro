@@ -1,7 +1,6 @@
 ---
 import Button from '../ui/Button.astro';
 import Card from '../ui/Card.astro';
-import Prompt from '../terminal/Prompt.astro';
 import type { GitHubProject } from '../../lib/github';
 
 interface Props {
@@ -15,9 +14,8 @@ const { projects } = Astro.props;
   <div class="container mx-auto px-6">
     <!-- Section header -->
     <div class="mb-12 animate-on-scroll">
-      <Prompt path="~/projects" command="ls -la" />
-      <h2 class="font-[var(--font-display)] text-4xl font-bold text-gray-100 mt-4">
-        Side <span class="text-[var(--color-terminal-purple)]">Projects</span>
+      <h2 class="font-[var(--font-display)] text-4xl font-bold text-gray-100">
+        Side <span class="text-[var(--color-terminal-green)]">Projects</span>
       </h2>
     </div>
 
@@ -27,26 +25,22 @@ const { projects } = Astro.props;
         <div class="animate-on-scroll" style={`animation-delay: ${i * 0.1}s;`}>
           <Card href={project.liveUrl || project.github}>
             <div class="p-6">
-              <!-- Project icon/emoji -->
               {project.emoji && (
                 <span class="text-4xl mb-4 block">{project.emoji}</span>
               )}
 
-              <!-- Title -->
-              <h3 class="font-[var(--font-display)] text-xl font-bold text-gray-100 mb-2 group-hover:text-[var(--color-terminal-green)] transition-colors">
+              <h3 class="font-[var(--font-display)] text-xl font-bold text-gray-100 mb-2">
                 {project.title}
               </h3>
 
-              <!-- Description (from summary.md if available) -->
               <p class="text-gray-400 text-sm mb-4">
                 {project.summary ? project.summary.split('\n')[0].slice(0, 150) : project.description}
               </p>
 
-              <!-- Tags -->
               {project.tags && project.tags.length > 0 && (
                 <div class="flex flex-wrap gap-2">
                   {project.tags.slice(0, 3).map((tag: string) => (
-                    <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-cyan)] rounded">
+                    <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-cyan)]">
                       {tag}
                     </span>
                   ))}
@@ -59,9 +53,7 @@ const { projects } = Astro.props;
     </div>
 
     <div class="text-center mt-12 animate-on-scroll">
-      <Button href="/projects" variant="terminal">
-        <span class="text-[var(--color-terminal-purple)]">$</span> ls -la --all
-      </Button>
+      <Button href="/projects" variant="outline">View All Projects</Button>
     </div>
   </div>
 </section>

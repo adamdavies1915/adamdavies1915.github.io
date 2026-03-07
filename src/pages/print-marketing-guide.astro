@@ -1,13 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Prompt from '../components/terminal/Prompt.astro';
 ---
 
 <BaseLayout title="Why Print Marketing Still Wins in a Digital World" description="How 4OVER4.COM helped me level up my brand with premium print products — business cards, stickers, banners, and more.">
   <section class="pt-32 pb-16">
     <div class="container mx-auto px-6">
-      <Prompt path="~/blog" command="cat print-marketing-guide.md" />
-      <p class="text-gray-400 font-[var(--font-mono)] text-sm mt-4">March 3, 2026</p>
+      <p class="text-gray-400 font-[var(--font-mono)] text-sm">March 3, 2026</p>
       <h1 class="font-[var(--font-display)] text-4xl md:text-5xl font-bold text-gray-100 mt-2 leading-tight">
         Why Print Marketing Still <span class="text-[var(--color-terminal-green)]">Wins</span> in a Digital World
       </h1>
@@ -167,7 +165,7 @@ import Prompt from '../components/terminal/Prompt.astro';
   }
 
   .prose-terminal em {
-    color: var(--color-terminal-yellow, #ffd93d);
+    color: var(--color-terminal-cyan);
     font-style: italic;
   }
 

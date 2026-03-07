@@ -1,6 +1,6 @@
 ---
 interface Props {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'terminal';
+  variant?: 'primary' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   href?: string;
   class?: string;
@@ -21,12 +21,8 @@ const baseStyles =
 const variants = {
   primary:
     'bg-[var(--color-terminal-green)] text-[var(--color-dark-900)] border-[var(--color-terminal-green)] hover:shadow-brutal-green hover:-translate-x-1 hover:-translate-y-1 font-medium',
-  secondary:
-    'bg-transparent text-[var(--color-terminal-cyan)] border-[var(--color-terminal-cyan)] hover:bg-[var(--color-terminal-cyan)] hover:text-[var(--color-dark-900)]',
-  ghost:
-    'bg-transparent text-[var(--color-terminal-purple)] border-transparent hover:border-[var(--color-terminal-purple)]',
-  terminal:
-    'bg-[var(--color-dark-700)] text-[var(--color-terminal-green)] border-[var(--color-terminal-green)]/50 hover:border-[var(--color-terminal-green)] hover:shadow-brutal-green hover:-translate-x-1 hover:-translate-y-1',
+  outline:
+    'bg-transparent text-[var(--color-terminal-green)] border-[var(--color-terminal-green)] hover:bg-[var(--color-terminal-green)] hover:text-[var(--color-dark-900)]',
 };
 
 const sizes = {
