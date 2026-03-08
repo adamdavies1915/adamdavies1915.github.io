@@ -5,50 +5,115 @@ import { siteConfig } from '../../data/site';
 
 <section class="min-h-screen flex items-center">
   <div class="container mx-auto px-6 pt-20">
-    <div class="max-w-3xl">
+    <div class="max-w-5xl">
+
       <!-- Terminal prompt -->
-      <div class="font-[var(--font-mono)] text-sm mb-6 flex items-center gap-2">
+      <div class="font-[var(--font-mono)] text-sm mb-8 flex items-center gap-2">
         <span class="text-[var(--color-terminal-cyan)]">~</span>
         <span class="text-[var(--color-terminal-green)]">$</span>
-        <span class="text-gray-400">whoami</span>
+        <span id="typewriter" class="text-gray-400"></span>
+        <span id="cursor" class="inline-block w-2 h-4 bg-[var(--color-terminal-green)] align-middle" style="animation: blink 1s step-end infinite;"></span>
       </div>
 
-      <!-- Name -->
-      <h1 class="font-[var(--font-display)] text-6xl md:text-8xl font-bold mb-6 leading-tight text-[var(--color-terminal-green)]">
-        {siteConfig.author}
-      </h1>
+      <!-- Output - hidden until typewriter completes -->
+      <div id="hero-output" class="opacity-0">
 
-      <!-- Role -->
-      <p class="font-[var(--font-mono)] text-xl md:text-2xl text-[var(--color-terminal-cyan)] mb-8">
-        <span class="text-[var(--color-terminal-green)]">&gt;</span> Full Stack Software Engineer
-      </p>
+        <!-- ASCII name -->
+        <pre class="hero-line font-[var(--font-mono)] text-[var(--color-terminal-green)] text-[clamp(6px,1.4vw,13px)] leading-tight mb-10 opacity-0 overflow-x-auto">
+ █████╗ ██████╗  █████╗ ███╗   ███╗
+██╔══██╗██╔══██╗██╔══██╗████╗ ████║
+███████║██║  ██║███████║██╔████╔██║
+██╔══██║██║  ██║██╔══██║██║╚██╔╝██║
+██║  ██║██████╔╝██║  ██║██║ ╚═╝ ██║
+╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝
 
-      <!-- Blurb -->
-      <p class="text-lg text-gray-400 max-w-2xl mb-12 leading-relaxed">
-        {siteConfig.blurb}
-      </p>
+██████╗  █████╗ ██╗   ██╗██╗███████╗███████╗
+██╔══██╗██╔══██╗██║   ██║██║██╔════╝██╔════╝
+██║  ██║███████║██║   ██║██║█████╗  ███████╗
+██║  ██║██╔══██║╚██╗ ██╔╝██║██╔══╝  ╚════██║
+██████╔╝██║  ██║ ╚████╔╝ ██║███████╗███████║
+╚═════╝ ╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝╚══════╝</pre>
 
-      <!-- CTAs -->
-      <div class="flex flex-wrap gap-4 mb-12">
-        <Button href="/about" variant="primary" size="lg">About Me</Button>
-        <Button href="/blog" variant="outline" size="lg">Blog</Button>
-        <Button href="/projects" variant="outline" size="lg">Projects</Button>
-      </div>
+        <!-- Role -->
+        <p class="hero-line font-[var(--font-mono)] text-xl md:text-2xl text-[var(--color-terminal-cyan)] mb-8 opacity-0">
+          <span class="text-[var(--color-terminal-green)]">&gt;</span> Software Engineer
+        </p>
 
-      <!-- Social links -->
-      <div class="flex items-center gap-3">
-        {siteConfig.social.map((item) => (
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="p-3 border border-white/10 hover:border-[var(--color-terminal-green)] hover:text-[var(--color-terminal-green)] transition-all text-gray-400"
-            aria-label={item.name}
-          >
-            <Fragment set:html={item.icon} />
-          </a>
-        ))}
+        <!-- Blurb + blinking cursor -->
+        <p class="hero-line text-gray-400 max-w-2xl mb-12 leading-relaxed opacity-0">
+          {siteConfig.blurb}<span id="blurb-cursor" class="inline-block w-[0.55em] h-[1em] bg-[var(--color-terminal-green)] ml-1 align-text-bottom opacity-0" style="animation: blink 1s step-end infinite;"></span>
+        </p>
+
+        <!-- CTAs -->
+        <div class="hero-line flex flex-wrap gap-4 mb-12 opacity-0">
+          <Button href="/about" variant="primary" size="lg">about-me</Button>
+          <Button href="/blog" variant="outline" size="lg">blog</Button>
+          <Button href="/projects" variant="outline" size="lg">projects</Button>
+        </div>
+
+        <!-- Social links -->
+        <div class="hero-line flex items-center gap-3 opacity-0">
+          {siteConfig.social.map((item) => (
+            <a
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="p-3 border border-white/10 hover:border-[var(--color-terminal-green)] hover:text-[var(--color-terminal-green)] transition-all text-gray-400"
+              aria-label={item.name}
+            >
+              <Fragment set:html={item.icon} />
+            </a>
+          ))}
+        </div>
+
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  const text = 'whoami';
+  const typewriter = document.getElementById('typewriter');
+  const cursor = document.getElementById('cursor');
+  const heroOutput = document.getElementById('hero-output');
+  const blurbCursor = document.getElementById('blurb-cursor');
+  const lines = document.querySelectorAll<HTMLElement>('.hero-line');
+
+  let i = 0;
+
+  function type() {
+    if (!typewriter) return;
+    if (i < text.length) {
+      typewriter.textContent += text[i];
+      i++;
+      setTimeout(type, 80);
+    } else {
+      setTimeout(() => {
+        if (cursor) cursor.style.display = 'none';
+        revealOutput();
+      }, 400);
+    }
+  }
+
+  function revealOutput() {
+    if (heroOutput) {
+      heroOutput.style.transition = 'opacity 0.3s ease-out';
+      heroOutput.style.opacity = '1';
+    }
+
+    lines.forEach((line, index) => {
+      setTimeout(() => {
+        line.style.transition = 'opacity 0.5s ease-out';
+        line.style.opacity = '1';
+
+        if (line.querySelector('#blurb-cursor') && blurbCursor) {
+          setTimeout(() => {
+            blurbCursor.style.opacity = '1';
+          }, 500);
+        }
+      }, index * 300);
+    });
+  }
+
+  setTimeout(type, 300);
+</script>

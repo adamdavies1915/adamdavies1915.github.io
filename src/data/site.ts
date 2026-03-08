@@ -6,7 +6,7 @@ export const siteConfig = {
   email: 'adam@bath.edu',
   location: 'New Orleans, Louisiana, USA',
 
-  blurb: 'Experienced full stack software engineer with 8+ years building scalable, production-ready systems across fintech, insurtech, and hospitality tech sectors.',
+  blurb: "I'm Adam Davies. A software engineer that loves building things that solve real problems. I've worked in a range of industries",
 
   aboutContent: `
 
