@@ -28,9 +28,9 @@ const projects = await fetchGitHubProjects('adamdavies1915', 'sideproject');
     <div class="container mx-auto px-6">
       <div class="grid md:grid-cols-2 gap-8">
         {projects.map((project, i) => (
-          <div class="animate-on-scroll" style={`animation-delay: ${i * 0.1}s;`}>
-            <Card class="h-full group" hover={true}>
-              <div class="p-6 h-full flex flex-col">
+          <div class="animate-on-scroll h-full" style={`animation-delay: ${i * 0.1}s;`}>
+            <Card class="h-full group" hover={true} title={`~/projects/${project.title.toLowerCase().replace(/\\s+/g, '-')}`}>
+              <div class="p-6 flex-1 flex flex-col">
                 {project.emoji && (
                   <span class="text-5xl mb-4 block">{project.emoji}</span>
                 )}

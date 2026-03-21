@@ -10,9 +10,9 @@ const currentPath = Astro.url.pathname;
   class="fixed top-0 left-0 right-0 z-40 bg-[var(--color-dark-900)] border-b border-white/5 transition-all duration-300"
 >
   <nav class="container mx-auto px-6 py-4 flex items-center justify-between">
-    <!-- Logo / Name -->
-    <a href="/" class="font-[var(--font-display)] font-bold text-xl hover:text-[var(--color-terminal-green)] transition-colors">
-      {siteConfig.title.toLowerCase().replace(' ', '-')}
+    <!-- Logo / Terminal prompt style -->
+    <a href="/" class="flex items-center gap-1 hover:text-[var(--color-terminal-green)] transition-colors font-[var(--font-mono)] text-sm">
+      <span class="text-[var(--color-terminal-green)]">adam</span><span class="text-gray-500">@</span><span class="text-[var(--color-terminal-cyan)]">dev</span><span class="text-gray-500">:</span><span class="text-[var(--color-terminal-cyan)]">~</span><span class="text-gray-400">$</span>
     </a>
 
     <!-- Navigation -->
@@ -25,13 +25,13 @@ const currentPath = Astro.url.pathname;
               <a
                 href={item.link}
                 class:list={[
-                  'font-[var(--font-mono)] text-sm transition-colors relative',
+                  'font-[var(--font-mono)] text-sm transition-colors relative group',
                   isActive
                     ? 'text-[var(--color-terminal-green)]'
                     : 'text-gray-400 hover:text-[var(--color-terminal-green)]',
                 ]}
               >
-                {item.name}
+                <span class="text-[var(--color-terminal-cyan)] opacity-60">/</span>{item.name}
                 {isActive && (
                   <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-[var(--color-terminal-green)]" />
                 )}
@@ -73,7 +73,7 @@ const currentPath = Astro.url.pathname;
                 isActive ? 'text-[var(--color-terminal-green)]' : 'text-gray-400',
               ]}
             >
-              {item.name}
+              <span class="text-[var(--color-terminal-cyan)] opacity-60">/</span>{item.name}
             </a>
           </li>
         );

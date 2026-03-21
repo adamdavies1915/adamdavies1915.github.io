@@ -10,7 +10,7 @@ interface Props {
 const { projects } = Astro.props;
 ---
 
-<section class="py-24">
+<section id="content" class="py-24">
   <div class="container mx-auto px-6">
     <!-- Section header -->
     <div class="mb-12 animate-on-scroll">
@@ -28,12 +28,8 @@ const { projects } = Astro.props;
     <div class="grid md:grid-cols-2 gap-8">
       {projects.map((project, i) => (
         <div class="animate-on-scroll" style={`animation-delay: ${i * 0.1}s;`}>
-          <Card href={project.liveUrl || project.github}>
+          <Card href={project.liveUrl || project.github} title={`~/projects/${project.title.toLowerCase().replace(/\s+/g, '-')}`}>
             <div class="p-6">
-              <p class="font-[var(--font-mono)] text-xs text-[var(--color-terminal-green)] mb-3">
-                ./{project.title.toLowerCase().replace(/\s+/g, '-')}/
-              </p>
-
               <h3 class="font-[var(--font-display)] text-xl font-bold text-gray-100 mb-2 group-hover:text-[var(--color-terminal-green)] transition-colors">
                 {project.title}
               </h3>

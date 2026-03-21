@@ -1,0 +1,57 @@
+---
+// Animated ASCII cyclist
+---
+
+<div class="overflow-hidden py-6 border-y border-white/5">
+  <pre
+    id="cargo-bike"
+    class="font-[var(--font-mono)] text-[var(--color-terminal-green)] text-base md:text-lg leading-tight whitespace-pre"
+    aria-hidden="true"
+  ></pre>
+</div>
+
+<script>
+  const frames = [
+    [
+      '  __o ',
+      ' -\\<, ',
+      ' O / O',
+    ],
+    [
+      '  __o ',
+      ' -\\<, ',
+      ' O \\ O',
+    ],
+  ];
+
+  const bikeEl = document.getElementById('cargo-bike');
+  if (bikeEl) {
+    const bike = bikeEl;
+    let frame = 0;
+    const speed = 1; // pixels per frame
+    const bikeWidth = 80; // approx pixel width of bike
+    let posPx = -bikeWidth;
+
+    function render() {
+      bike.style.transform = `translateX(${posPx}px)`;
+      bike.textContent = frames[frame].join('\n');
+    }
+
+    function animate() {
+      posPx += speed;
+
+      if (posPx > window.innerWidth + bikeWidth) {
+        posPx = -bikeWidth;
+      }
+
+      render();
+      requestAnimationFrame(animate);
+    }
+
+    setInterval(() => {
+      frame = frame === 0 ? 1 : 0;
+    }, 250);
+
+    animate();
+  }
+</script>

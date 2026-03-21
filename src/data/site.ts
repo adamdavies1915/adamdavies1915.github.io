@@ -1,17 +1,13 @@
 export const siteConfig = {
   title: 'Adam Davies',
-  description: 'Experienced full stack software engineer with 8+ years building scalable systems across fintech, insurtech, and hospitality tech',
   url: 'https://adamdavies.dev',
   author: 'Adam Davies',
   email: 'adam@bath.edu',
   location: 'New Orleans, Louisiana, USA',
 
-  blurb: "I'm Adam Davies. A software engineer that loves building things that solve real problems. I've worked in a range of industries",
-
-  aboutContent: `
-
-When I'm not coding, you'll find me cycling through New Orleans, kayaking the bayous, or planning my next adventure. I'm  a board member of Bike Easy, a local bicycle advocacy group promoting sustainable transportation and safer streets in our community.`,
-
+  blurb: `I'm a software engineer who cares most about building things that make a difference. I've worked across a range of industries and my day job is now with Second Nature in the PropTech space. By night I love civic hacking and trying to build software to make our cities better!
+   I love the power that agentic coding has brought but I still believe writing should be human. All writing here is from me!`,
+  aboutContent: `When I'm not coding, you'll find me cycling through New Orleans, kayaking the bayous, or planning my next adventure. I'm  a board member of Bike Easy, a local bicycle advocacy group promoting sustainable transportation and safer streets in our community.`,
   navigation: [
     { name: 'about', link: '/about' },
     { name: 'blog', link: '/blog' },

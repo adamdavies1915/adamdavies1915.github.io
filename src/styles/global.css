@@ -119,6 +119,14 @@ body {
   background: var(--color-terminal-green);
 }
 
+/* Grid background pattern */
+.grid-bg {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--color-terminal-green) 3%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-terminal-green) 3%, transparent) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
 /* Custom utilities */
 @layer utilities {
   .border-3 {

@@ -14,7 +14,7 @@ function formatDate(date: Date): string {
 ---
 
 <article class="group">
-  <Card href={`/blog/${post.slug}`}>
+  <Card href={`/blog/${post.slug}`} title={`~/blog/${post.slug}.md`}>
     <!-- Image -->
     {post.data.image && (
       <div class="aspect-video overflow-hidden">
