@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Card from '../components/ui/Card.astro';
-import Prompt from '../components/terminal/Prompt.astro';
 import { fetchGitHubProjects } from '../lib/github';
 
 // Fetch from GitHub at build time
@@ -11,12 +10,16 @@ const projects = await fetchGitHubProjects('adamdavies1915', 'sideproject');
 <BaseLayout title="Projects" description="Side projects and experiments by Adam Davies">
   <section class="pt-32 pb-16">
     <div class="container mx-auto px-6">
-      <Prompt path="~/projects" command="ls -la --source=github" />
-      <h1 class="font-[var(--font-display)] text-5xl font-bold text-gray-100 mt-4">
-        Side <span class="text-[var(--color-terminal-purple)]">Projects</span>
+      <div class="font-[var(--font-mono)] text-xs text-gray-500 mb-3">
+        <span class="text-[var(--color-terminal-cyan)]">~/projects</span>
+        <span class="text-[var(--color-terminal-green)] mx-1">$</span>
+        ls -la --source=github
+      </div>
+      <h1 class="font-[var(--font-display)] text-5xl font-bold text-gray-100">
+        Side <span class="text-[var(--color-terminal-green)]">Projects</span>
       </h1>
       <p class="text-gray-400 mt-4 max-w-2xl">
-        A collection of tools, experiments, and side projects I've built. Includes projects from GitHub with the <code class="text-[var(--color-terminal-cyan)] bg-[var(--color-dark-600)] px-1 rounded">sideproject</code> topic.
+        A collection of tools, experiments, and side projects I've built. Includes projects from GitHub with the <code class="text-[var(--color-terminal-cyan)] bg-[var(--color-dark-600)] px-1">sideproject</code> topic.
       </p>
     </div>
   </section>
@@ -25,36 +28,31 @@ const projects = await fetchGitHubProjects('adamdavies1915', 'sideproject');
     <div class="container mx-auto px-6">
       <div class="grid md:grid-cols-2 gap-8">
         {projects.map((project, i) => (
-          <div class="animate-on-scroll" style={`animation-delay: ${i * 0.1}s;`}>
-            <Card class="h-full group" hover={true}>
-              <div class="p-6 h-full flex flex-col">
-                <!-- Project icon/emoji -->
+          <div class="animate-on-scroll h-full" style={`animation-delay: ${i * 0.1}s;`}>
+            <Card class="h-full group" hover={true} title={`~/projects/${project.title.toLowerCase().replace(/\\s+/g, '-')}`}>
+              <div class="p-6 flex-1 flex flex-col">
                 {project.emoji && (
                   <span class="text-5xl mb-4 block">{project.emoji}</span>
                 )}
 
-                <!-- Title -->
                 <h2 class="font-[var(--font-display)] text-2xl font-bold text-gray-100 mb-3 group-hover:text-[var(--color-terminal-green)] transition-colors">
                   {project.title}
                 </h2>
 
-                <!-- Description (from summary.md if available, else repo description) -->
                 <div class="text-gray-400 mb-4 text-sm whitespace-pre-line">
                   {project.summary ? project.summary.trim() : project.description}
                 </div>
 
-                <!-- Tags -->
                 {project.tags && project.tags.length > 0 && (
                   <div class="flex flex-wrap gap-2 mb-4">
                     {project.tags.slice(0, 5).map((tag: string) => (
-                      <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-cyan)] rounded">
-                        {tag}
+                      <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-cyan)]">
+                        [{tag}]
                       </span>
                     ))}
                   </div>
                 )}
 
-                <!-- Links -->
                 <div class="flex flex-wrap gap-4 mt-auto">
                   {project.liveUrl && (
                     <a
@@ -80,7 +78,7 @@ const projects = await fetchGitHubProjects('adamdavies1915', 'sideproject');
                     </svg>
                     Source
                     {project.stars > 0 && (
-                      <span class="ml-1 text-[var(--color-terminal-orange)]">
+                      <span class="ml-1 text-[var(--color-terminal-cyan)]">
                         ({project.stars} ★)
                       </span>
                     )}
@@ -94,10 +92,7 @@ const projects = await fetchGitHubProjects('adamdavies1915', 'sideproject');
 
       {projects.length === 0 && (
         <div class="text-center py-16">
-          <div class="font-[var(--font-mono)] text-[var(--color-terminal-cyan)] mb-4">
-            $ ls<br />
-            <span class="text-gray-500">No projects found.</span>
-          </div>
+          <p class="font-[var(--font-mono)] text-[var(--color-terminal-cyan)]">No projects found.</p>
         </div>
       )}
     </div>

@@ -41,10 +41,7 @@ const fullTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.
       document.documentElement.setAttribute('data-theme', theme);
     </script>
   </head>
-  <body class="min-h-screen">
-    <!-- Scanlines overlay -->
-    <div class="scanlines" aria-hidden="true"></div>
-
+  <body class="min-h-screen grid-bg">
     <Header />
 
     <main>
@@ -70,7 +67,6 @@ const fullTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.
       );
 
       document.querySelectorAll('.animate-on-scroll').forEach((el) => {
-        // Check if element is already in viewport on page load
         const rect = el.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
           el.classList.add('visible');

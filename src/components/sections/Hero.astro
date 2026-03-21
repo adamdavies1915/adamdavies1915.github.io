@@ -1,76 +1,221 @@
 ---
 import Button from '../ui/Button.astro';
-import FloatingCode from '../effects/FloatingCode.astro';
-import GlitchText from '../effects/GlitchText.astro';
-import Cursor from '../terminal/Cursor.astro';
 import { siteConfig } from '../../data/site';
 ---
 
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-  <!-- Grid background -->
-  <div class="absolute inset-0 grid-bg"></div>
+<section class="min-h-screen flex items-center">
+  <div class="container mx-auto px-6 pt-20">
+    <div id="terminal-session" class="max-w-5xl font-[var(--font-mono)]">
 
-  <!-- Floating code decorations -->
-  <FloatingCode />
-
-  <div class="container mx-auto px-6 pt-20 relative z-10">
-    <div class="max-w-4xl">
-      <!-- Terminal prompt -->
-      <div class="font-[var(--font-mono)] text-[var(--color-terminal-green)] mb-4 flex items-center gap-2">
+      <!-- Command 1: whoami -->
+      <div class="text-sm mb-2 flex items-center gap-2">
         <span class="text-[var(--color-terminal-cyan)]">~</span>
-        <span class="text-[var(--color-terminal-purple)]">$</span>
-        <span>whoami</span>
-        <Cursor />
+        <span class="text-[var(--color-terminal-green)]">$</span>
+        <span id="cmd-1" class="text-gray-400"></span>
+        <span id="cursor" class="inline-block w-2 h-4 bg-[var(--color-terminal-green)] align-middle" style="animation: blink 1s step-end infinite;"></span>
       </div>
 
-      <!-- Main heading -->
-      <h1 class="font-[var(--font-display)] text-5xl md:text-7xl font-bold mb-6 leading-tight">
-        <span class="text-gray-100">Hi! I'm</span>
-        <br />
-        <GlitchText text="Adam Davies" class="text-[var(--color-terminal-green)]" />
-      </h1>
+      <!-- Output 1: ASCII name (renders line by line) -->
+      <pre id="ascii-output" class="text-[var(--color-terminal-green)] text-[clamp(6px,1.4vw,13px)] leading-tight mb-6 overflow-x-auto hidden"></pre>
 
-      <!-- Subtitle -->
-      <p class="font-[var(--font-mono)] text-xl md:text-2xl text-[var(--color-terminal-cyan)] mb-8">
-        <span class="text-[var(--color-terminal-purple)]">&gt;</span> Full Stack Software Engineer
-      </p>
-
-      <!-- Bio -->
-      <p class="text-lg text-gray-400 max-w-2xl mb-10 leading-relaxed">
-        {siteConfig.blurb}
-      </p>
-
-      <!-- Social links -->
-      <div class="flex items-center gap-4 mb-10">
-        {siteConfig.social.map((item) => (
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="p-3 border border-white/10 rounded-lg hover:border-[var(--color-terminal-green)] hover:text-[var(--color-terminal-green)] transition-all hover:glow-green text-gray-400"
-            aria-label={item.name}
-          >
-            <Fragment set:html={item.icon} />
-          </a>
-        ))}
+      <!-- Command 2: cat bio.txt -->
+      <div id="cmd-2-line" class="text-sm mb-2 flex items-center gap-2 hidden">
+        <span class="text-[var(--color-terminal-cyan)]">~</span>
+        <span class="text-[var(--color-terminal-green)]">$</span>
+        <span id="cmd-2" class="text-gray-400"></span>
       </div>
 
-      <!-- CTAs -->
-      <div class="flex flex-wrap gap-4">
-        <Button href="/about" variant="primary">About Me</Button>
-        <Button href="/blog" variant="secondary">Read Blog</Button>
-        <Button href="/projects" variant="terminal">View Projects</Button>
+      <!-- Output 2: Role + blurb -->
+      <div id="bio-output" class="mb-6 hidden">
+        <p class="text-xl md:text-2xl text-[var(--color-terminal-cyan)] mb-4">
+          <span class="text-[var(--color-terminal-green)]">&gt;</span> Software Engineer
+        </p>
+        <p class="text-gray-400 max-w-2xl leading-relaxed font-[var(--font-sans)]">
+          {siteConfig.blurb}<span id="blurb-cursor" class="inline-block w-[2px] h-[1.2em] bg-[var(--color-terminal-green)] ml-0.5 align-middle" style="animation: blink 1s step-end infinite;"></span>
+        </p>
       </div>
-    </div>
-  </div>
 
-  <!-- Scroll indicator -->
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-    <div class="font-[var(--font-mono)] text-xs text-[var(--color-terminal-green)] flex flex-col items-center gap-2">
-      <span>[scroll]</span>
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-      </svg>
+      <!-- Command 3: ls ./ -->
+      <div id="cmd-3-line" class="text-sm mb-4 flex items-center gap-2 hidden">
+        <span class="text-[var(--color-terminal-cyan)]">~</span>
+        <span class="text-[var(--color-terminal-green)]">$</span>
+        <span id="cmd-3" class="text-gray-400"></span>
+      </div>
+
+      <!-- Output 3: Navigation links as directory listing -->
+      <div id="nav-output" class="mb-8 hidden">
+        <div class="flex flex-wrap gap-4 mb-8">
+          <Button href="/about" variant="primary" size="lg">about-me</Button>
+          <Button href="/blog" variant="outline" size="lg">blog</Button>
+          <Button href="/projects" variant="outline" size="lg">projects</Button>
+        </div>
+
+        <div class="flex items-center gap-3">
+          {siteConfig.social.map((item) => (
+            <a
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="p-3 border border-white/10 hover:border-[var(--color-terminal-green)] hover:text-[var(--color-terminal-green)] transition-all text-gray-400"
+              aria-label={item.name}
+            >
+              <Fragment set:html={item.icon} />
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Final prompt with scroll hint -->
+      <div id="final-prompt" class="text-sm flex items-center gap-2 hidden">
+        <span class="text-[var(--color-terminal-cyan)]">~</span>
+        <span class="text-[var(--color-terminal-green)]">$</span>
+        <a href="#content" class="text-gray-400 hover:text-[var(--color-terminal-green)] transition-colors animate-pulse">scroll down ↓</a>
+      </div>
+
     </div>
   </div>
 </section>
+
+<script>
+  const asciiArt = ` \u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2557   \u2588\u2588\u2588\u2557
+\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2551
+\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2554\u2588\u2588\u2588\u2588\u2554\u2588\u2588\u2551
+\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2551\u255A\u2588\u2588\u2554\u255D\u2588\u2588\u2551
+\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2551 \u255A\u2550\u255D \u2588\u2588\u2551
+\u255A\u2550\u255D  \u255A\u2550\u255D\u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D  \u255A\u2550\u255D\u255A\u2550\u255D     \u255A\u2550\u255D
+
+\u2588\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557   \u2588\u2588\u2557\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557
+\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D
+\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557
+\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u255A\u2588\u2588\u2557 \u2588\u2588\u2554\u255D\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u255D  \u255A\u2550\u2550\u2550\u2550\u2588\u2588\u2551
+\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551  \u2588\u2588\u2551 \u255A\u2588\u2588\u2588\u2588\u2554\u255D \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551
+\u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D  \u255A\u2550\u255D  \u255A\u2550\u2550\u2550\u255D  \u255A\u2550\u255D\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D`;
+
+  const asciiLines = asciiArt.split('\n');
+  const cursor = document.getElementById('cursor');
+  const asciiOutput = document.getElementById('ascii-output') as HTMLPreElement;
+  const cmd2Line = document.getElementById('cmd-2-line');
+  const cmd2 = document.getElementById('cmd-2');
+  const bioOutput = document.getElementById('bio-output');
+  const cmd3Line = document.getElementById('cmd-3-line');
+  const cmd3 = document.getElementById('cmd-3');
+  const navOutput = document.getElementById('nav-output');
+  const finalPrompt = document.getElementById('final-prompt');
+  const blurbCursor = document.getElementById('blurb-cursor');
+
+  // Utility: type text into an element
+  function typeText(el: HTMLElement, text: string, speed: number): Promise<void> {
+    return new Promise((resolve) => {
+      let i = 0;
+      function tick() {
+        if (i < text.length) {
+          el.textContent += text[i];
+          i++;
+          setTimeout(tick, speed);
+        } else {
+          resolve();
+        }
+      }
+      tick();
+    });
+  }
+
+  // Utility: render ASCII art line by line
+  function renderAscii(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!asciiOutput) { resolve(); return; }
+      asciiOutput.classList.remove('hidden');
+      let lineIdx = 0;
+      function nextLine() {
+        if (lineIdx < asciiLines.length) {
+          asciiOutput.textContent += (lineIdx > 0 ? '\n' : '') + asciiLines[lineIdx];
+          lineIdx++;
+          setTimeout(nextLine, 40);
+        } else {
+          resolve();
+        }
+      }
+      nextLine();
+    });
+  }
+
+  // Move cursor to an element (append it)
+  function moveCursor(parent: HTMLElement) {
+    if (cursor) {
+      parent.appendChild(cursor);
+    }
+  }
+
+  // Main sequence
+  async function run() {
+    const cmd1 = document.getElementById('cmd-1');
+
+    // 1. Type "whoami"
+    if (cmd1) await typeText(cmd1, 'whoami', 80);
+    await delay(300);
+    if (cursor) cursor.style.display = 'none';
+
+    // 2. Render ASCII art line by line
+    await renderAscii();
+    await delay(400);
+
+    // 3. Show second prompt, type "cat bio.txt"
+    if (cmd2Line) {
+      cmd2Line.classList.remove('hidden');
+      if (cursor) {
+        cursor.style.display = '';
+        moveCursor(cmd2Line);
+      }
+    }
+    if (cmd2) await typeText(cmd2, 'cat bio.txt', 60);
+    await delay(200);
+    if (cursor) cursor.style.display = 'none';
+
+    // 4. Show bio output
+    if (bioOutput) {
+      bioOutput.classList.remove('hidden');
+      bioOutput.style.opacity = '0';
+      bioOutput.style.transition = 'opacity 0.5s ease-out';
+      // trigger reflow
+      bioOutput.offsetHeight;
+      bioOutput.style.opacity = '1';
+    }
+    await delay(600);
+
+    // Hide blurb cursor before moving on
+    if (blurbCursor) blurbCursor.style.display = 'none';
+
+    // 5. Show third prompt, type "ls ./"
+    if (cmd3Line) {
+      cmd3Line.classList.remove('hidden');
+      if (cursor) {
+        cursor.style.display = '';
+        moveCursor(cmd3Line);
+      }
+    }
+    if (cmd3) await typeText(cmd3, 'ls ./', 60);
+    await delay(200);
+    if (cursor) cursor.style.display = 'none';
+
+    // 6. Show nav output
+    if (navOutput) {
+      navOutput.classList.remove('hidden');
+      navOutput.style.opacity = '0';
+      navOutput.style.transition = 'opacity 0.5s ease-out';
+      navOutput.offsetHeight;
+      navOutput.style.opacity = '1';
+    }
+    await delay(400);
+
+    // 7. Show final waiting prompt
+    if (finalPrompt) {
+      finalPrompt.classList.remove('hidden');
+    }
+  }
+
+  function delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  setTimeout(run, 300);
+</script>

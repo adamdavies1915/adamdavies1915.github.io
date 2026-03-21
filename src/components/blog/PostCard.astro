@@ -9,16 +9,12 @@ interface Props {
 const { post } = Astro.props;
 
 function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  return date.toISOString().split('T')[0]; // YYYY-MM-DD
 }
 ---
 
 <article class="group">
-  <Card href={`/blog/${post.slug}`}>
+  <Card href={`/blog/${post.slug}`} title={`~/blog/${post.slug}.md`}>
     <!-- Image -->
     {post.data.image && (
       <div class="aspect-video overflow-hidden">
@@ -32,10 +28,11 @@ function formatDate(date: Date): string {
 
     <!-- Content -->
     <div class="p-6">
-      <!-- Date -->
-      <p class="font-[var(--font-mono)] text-xs text-[var(--color-terminal-cyan)] mb-2">
-        <span class="text-[var(--color-terminal-purple)]">&gt;</span>
-        {formatDate(post.data.date)}
+      <!-- File path + date -->
+      <p class="font-[var(--font-mono)] text-xs text-gray-500 mb-3">
+        <span class="text-[var(--color-terminal-green)]">-rw-r--r--</span>
+        <span class="ml-2 text-[var(--color-terminal-cyan)]">{formatDate(post.data.date)}</span>
+        <span class="ml-2">{post.slug}.md</span>
       </p>
 
       <!-- Title -->
@@ -52,17 +49,12 @@ function formatDate(date: Date): string {
       {post.data.tags && (
         <div class="flex flex-wrap gap-2 mt-4">
           {post.data.tags.slice(0, 3).map((tag: string) => (
-            <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-purple)] rounded">
-              #{tag}
+            <span class="font-[var(--font-mono)] text-xs px-2 py-1 bg-[var(--color-dark-600)] text-[var(--color-terminal-cyan)]">
+              [{tag}]
             </span>
           ))}
         </div>
       )}
-
-      <!-- Read more indicator -->
-      <div class="mt-4 font-[var(--font-mono)] text-sm text-[var(--color-terminal-green)] opacity-0 group-hover:opacity-100 transition-opacity">
-        $ cat post.md <span class="animate-[blink_1s_step-end_infinite]">_</span>
-      </div>
     </div>
   </Card>
 </article>

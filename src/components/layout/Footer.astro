@@ -6,25 +6,33 @@ const currentYear = new Date().getFullYear();
 
 <footer class="border-t border-white/5 bg-[var(--color-dark-800)]">
   <div class="container mx-auto px-6 py-12">
+
+    <!-- Terminal exit sequence -->
+    <div class="font-[var(--font-mono)] text-sm mb-8">
+      <p class="text-gray-500 mb-1">
+        <span class="text-[var(--color-terminal-cyan)]">~</span>
+        <span class="text-[var(--color-terminal-green)] mx-1">$</span>
+        <span class="text-gray-400">exit</span>
+      </p>
+      <p class="text-gray-600 text-xs">logout</p>
+      <p class="text-gray-600 text-xs">Connection to adamdavies.dev closed.</p>
+    </div>
+
     <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-      <!-- Left side - Name and tagline -->
+      <!-- Left side -->
       <div class="text-center md:text-left">
-        <div class="font-[var(--font-mono)] text-[var(--color-terminal-green)] mb-2">
-          <span class="text-[var(--color-terminal-cyan)]">$</span> echo "Thanks for visiting!"
-        </div>
-        <p class="text-gray-500 text-sm">
-          {siteConfig.author} &copy; {currentYear}
-        </p>
+        <p class="font-[var(--font-mono)] text-sm text-gray-400">{siteConfig.author}</p>
+        <p class="font-[var(--font-mono)] text-xs text-gray-600">&copy; {currentYear}</p>
       </div>
 
       <!-- Social links -->
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3">
         {siteConfig.social.map((item) => (
           <a
             href={item.link}
             target="_blank"
             rel="noopener noreferrer"
-            class="p-3 border border-white/10 rounded-lg hover:border-[var(--color-terminal-green)] hover:text-[var(--color-terminal-green)] transition-all hover:glow-green text-gray-400"
+            class="p-3 border border-white/10 hover:border-[var(--color-terminal-green)] hover:text-[var(--color-terminal-green)] transition-all text-gray-400"
             aria-label={item.name}
           >
             <Fragment set:html={item.icon} />
@@ -34,16 +42,14 @@ const currentYear = new Date().getFullYear();
     </div>
 
     <!-- Bottom bar -->
-    <div class="mt-8 pt-8 border-t border-white/5 text-center">
+    <div class="mt-8 pt-6 border-t border-white/5 text-center">
       <p class="font-[var(--font-mono)] text-xs text-gray-600">
-        <span class="text-[var(--color-terminal-purple)]">// </span>
-        Built with Astro + Tailwind
-        <span class="text-[var(--color-terminal-purple)]"> | </span>
+        <span class="text-[var(--color-terminal-green)]">#</span> built with astro &mdash;
         <a
           href="https://github.com/adamdavies1915/adamdavies1915.github.io"
           class="text-[var(--color-terminal-cyan)] hover:text-[var(--color-terminal-green)] transition-colors"
         >
-          View source
+          view source
         </a>
       </p>
     </div>
