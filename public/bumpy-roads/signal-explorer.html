@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bumpy Roads — Signal Processing Pipeline</title>
+  <meta name="description" content="Interactive signal explorer for the Bumpy Roads road-quality project: toggle pedaling, rough surface, pothole, and braking components and watch how the MAD and LPC algorithms break them down." />
+  <meta property="og:title" content="Bumpy Roads — Signal Processing Pipeline" />
+  <meta property="og:description" content="From raw accelerometer signal to road-roughness score. Toggle components and watch the algorithms in real time." />
+  <meta property="og:type" content="article" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0F1729; }
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.2); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useContext, createContext } = React;
+
+const SR = 60, DUR = 10, N = SR * DUR, LPC_ORDER = 8;
+
+// Shared playhead context so every Wave animates in sync without prop drilling.
+// value = fraction 0..1. 1 means "fully drawn, no playback overlay".
+const PlayheadContext = createContext(1);
+
+// Audio selection context — which stage's signal is currently audible.
+// value = { activeKey: string|null, setKey: fn }. Null = muted.
+const AudioSelectionContext = createContext({ activeKey: null, setKey: () => {} });
+
+// Sonify a 60Hz signal into a 10-second AudioBuffer. The signal value maps
+// to OSCILLATOR PITCH (not volume) — a theremin-style mapping where larger
+// signal = higher pitch. Pedaling reads as a slow pitch wobble, the rough
+// patch as fast random pitch jitter, the pothole as a sharp pitch spike,
+// braking as a dip below the centre. Volume is essentially constant so the
+// user's ear is free to track frequency.
+function sonify(signal, ctx) {
+  const sr = ctx.sampleRate;
+  const bufLen = Math.floor(sr * DUR);
+  const buffer = ctx.createBuffer(1, bufLen, sr);
+  const data = buffer.getChannelData(0);
+
+  // Normalise signal to [-1, 1] so every stage uses the same pitch budget
+  // regardless of its raw magnitude (the MAD envelope and the raw signal
+  // differ by ~20x in absolute scale).
+  let maxAbs = 0;
+  for (let i = 0; i < signal.length; i++) maxAbs = Math.max(maxAbs, Math.abs(signal[i]));
+  if (maxAbs < 1e-6) maxAbs = 1;
+
+  const CENTRE_HZ = 440;      // centre pitch (A4)
+  const OCTAVES   = 2.0;      // total range = ±2 octaves around centre
+  const FADE_S    = 0.015;    // edge fade to mask loop-boundary phase click
+  const fadeN = Math.floor(FADE_S * sr);
+
+  let phase = 0;
+  for (let i = 0; i < bufLen; i++) {
+    const t = i / sr;
+    const sigIdx = t * SR;
+    const i0 = Math.floor(sigIdx);
+    const i1 = Math.min(i0 + 1, signal.length - 1);
+    const frac = sigIdx - i0;
+    const env = (signal[i0] * (1 - frac) + signal[i1] * frac) / maxAbs;
+
+    // Exponential frequency mapping — perceptually even per-octave.
+    // env = -1 -> CENTRE / 2^OCTAVES, env = +1 -> CENTRE * 2^OCTAVES
+    const freq = CENTRE_HZ * Math.pow(2, env * OCTAVES);
+    phase += 2 * Math.PI * freq / sr;
+
+    // Sine + a sprinkle of 2nd/3rd harmonic so it sounds like a reed
+    // instrument rather than a pure test tone.
+    const osc = Math.sin(phase) * 0.7
+              + Math.sin(phase * 2) * 0.18
+              + Math.sin(phase * 3) * 0.06;
+
+    // Mask the click at the loop boundary with tiny fade-in/out.
+    let edge = 1;
+    if (i < fadeN)           edge = i / fadeN;
+    else if (i > bufLen - fadeN) edge = (bufLen - i) / fadeN;
+
+    data[i] = osc * 0.22 * edge;
+  }
+  return buffer;
+}
+
+const C = {
+  bg: "#0F1729", card: "#1A2332", text: "#E2E8F0", dim: "#64748B",
+  border: "rgba(148,163,184,0.15)", grid: "rgba(148,163,184,0.1)",
+  gridText: "rgba(148,163,184,0.45)",
+  pedaling: "#6B8AFF", roughSurface: "#F59E0B", pothole: "#EF4444", braking: "#8B5CF6",
+  raw: "#94A3B8", hp: "#22D3EE", fd: "#34D399",
+  mad: "#FB923C", lpc: "#A78BFA", combined: "#F43F5E",
+};
+
+// ── Signal generation ────────────────────────────────────────────────────────
+function generateSignal(comp) {
+  const sig = new Float64Array(N);
+  const labels = new Array(N).fill(null);
+  let seed = 42;
+  function rng() { seed = (seed * 1664525 + 1013904223) & 0xffffffff; return seed / 0x80000000 - 1; }
+
+  for (let i = 0; i < N; i++) {
+    const t = i / SR;
+    let v = 0;
+
+    if (comp.pedaling) {
+      v += 0.8 * Math.sin(2 * Math.PI * 1.5 * t);
+      v += 0.3 * Math.sin(2 * Math.PI * 3.0 * t + 0.5);
+      if (i === Math.floor(1.5 * SR)) labels[i] = "pedaling";
+    }
+
+    if (comp.roughSurface) {
+      // Baseline road texture — random noise (each bump is independent,
+      // unlike pedaling which is periodic — LPC can't predict this)
+      v += 0.08 * rng();
+      // Bad patch from 3s to 6s — much rougher random noise
+      if (t >= 3.0 && t <= 6.0) {
+        const env = Math.sin(Math.PI * (t - 3.0) / 3.0);
+        v += 0.6 * env * rng();
+        if (i === Math.floor(4.5 * SR)) labels[i] = "rough surface";
+      }
+    }
+
+    if (comp.pothole) {
+      const dt = t - 6.8;
+      if (Math.abs(dt) < 0.12) {
+        v += 3.5 * Math.exp(-dt * dt / (2 * 0.02 * 0.02));
+        if (i === Math.floor(6.8 * SR)) labels[i] = "pothole";
+      }
+    }
+
+    if (comp.braking && t >= 8.2 && t <= 9.5) {
+      v += -1.2 * Math.sin(Math.PI * (t - 8.2) / 1.3);
+      if (i === Math.floor(8.8 * SR)) labels[i] = "braking";
+    }
+
+    sig[i] = v;
+  }
+  return { signal: sig, labels };
+}
+
+// ── Processing pipeline ──────────────────────────────────────────────────────
+
+// High-pass filter (EMA) — removes slow movements
+function highPass(sig, alpha = 0.1) {
+  const out = new Float64Array(sig.length);
+  let prev = sig[0], prevOut = 0;
+  for (let i = 1; i < sig.length; i++) {
+    prevOut = (1 - alpha) * (prevOut + sig[i] - prev);
+    prev = sig[i];
+    out[i] = prevOut;
+  }
+  return out;
+}
+
+// First difference — amplifies rapid changes
+function firstDiff(sig) {
+  const out = new Float64Array(sig.length);
+  for (let i = 1; i < sig.length; i++) out[i] = sig[i] - sig[i - 1];
+  return out;
+}
+
+// Rolling median
+function rollingMedian(sig, ws = 120) {
+  const out = new Float64Array(sig.length);
+  for (let i = 0; i < sig.length; i++) {
+    const s = Math.max(0, i - ws + 1);
+    const win = [];
+    for (let j = s; j <= i; j++) win.push(sig[j]);
+    win.sort((a, b) => a - b);
+    out[i] = win[Math.floor(win.length / 2)];
+  }
+  return out;
+}
+
+// Rolling MAD (Median Absolute Deviation)
+function rollingMAD(sig, ws = 120) {
+  const out = new Float64Array(sig.length);
+  for (let i = 0; i < sig.length; i++) {
+    const s = Math.max(0, i - ws + 1);
+    const win = [];
+    for (let j = s; j <= i; j++) win.push(sig[j]);
+    win.sort((a, b) => a - b);
+    const med = win[Math.floor(win.length / 2)];
+    const devs = win.map(v => Math.abs(v - med)).sort((a, b) => a - b);
+    out[i] = devs[Math.floor(devs.length / 2)];
+  }
+  return out;
+}
+
+// LPC — returns predicted, raw residual, and smoothed envelope
+function lpcPipeline(sig, order = LPC_ORDER, ws = 120) {
+  const pred = new Float64Array(sig.length);
+  const resid = new Float64Array(sig.length);
+
+  for (let wi = ws; wi < sig.length; wi += Math.floor(ws / 2)) {
+    const end = Math.min(wi + Math.floor(ws / 2), sig.length);
+    const win = sig.slice(wi - ws, wi);
+    const M = win.length;
+
+    const R = new Float64Array(order + 1);
+    for (let k = 0; k <= order; k++) {
+      let sum = 0;
+      for (let n = 0; n < M - k; n++) sum += win[n] * win[n + k];
+      R[k] = sum / M;
+    }
+    if (R[0] < 1e-12) continue;
+
+    const a = new Float64Array(order), ap = new Float64Array(order);
+    a[0] = -R[1] / R[0];
+    let err = R[0] * (1 - a[0] * a[0]);
+    for (let m = 1; m < order; m++) {
+      let lam = R[m + 1];
+      for (let j = 0; j < m; j++) lam += a[j] * R[m - j];
+      lam = -lam / err;
+      ap.set(a); a[m] = lam;
+      for (let j = 0; j < m; j++) a[j] = ap[j] + lam * ap[m - 1 - j];
+      err *= 1 - lam * lam;
+      if (err < 1e-12) break;
+    }
+
+    for (let n = wi; n < end; n++) {
+      if (n < order) continue;
+      let p = 0;
+      for (let k = 0; k < order; k++) p -= a[k] * sig[n - 1 - k];
+      pred[n] = p;
+      resid[n] = sig[n] - p;
+    }
+  }
+
+  // Smoothed RMS envelope
+  const env = new Float64Array(sig.length);
+  const sw = 30;
+  for (let i = 0; i < sig.length; i++) {
+    let sum = 0, cnt = 0;
+    for (let j = Math.max(0, i - sw); j <= i; j++) { sum += resid[j] * resid[j]; cnt++; }
+    env[i] = Math.sqrt(sum / cnt);
+  }
+  return { predicted: pred, residual: resid, envelope: env };
+}
+
+// Combined score
+function combined(a, b) {
+  const out = new Float64Array(a.length);
+  for (let i = 0; i < a.length; i++) out[i] = Math.sqrt(Math.max(0, a[i]) * Math.max(0, b[i]));
+  return out;
+}
+
+// ── Waveform canvas ──────────────────────────────────────────────────────────
+function Wave({ signal, color, height = 110, labels = null, isEnvelope = false,
+                overlay = null, overlayColor = null, overlayDashed = true }) {
+  const cRef = useRef(null), boxRef = useRef(null);
+  const playhead = useContext(PlayheadContext);
+
+  useEffect(() => {
+    const cv = cRef.current, box = boxRef.current;
+    if (!cv || !box || !signal || !signal.length) return;
+    const rect = box.getBoundingClientRect();
+    const w = Math.floor(rect.width), h = height;
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = w * dpr; cv.height = h * dpr;
+    cv.style.width = w + "px"; cv.style.height = h + "px";
+    const ctx = cv.getContext("2d");
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+
+    const p = { l: 0, r: 0, t: 8, b: 16 };
+    const pw = w - p.l - p.r, ph = h - p.t - p.b;
+    const midY = p.t + ph / 2;
+
+    // Zero line
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(p.l, midY); ctx.lineTo(w - p.r, midY); ctx.stroke();
+
+    // Time markers
+    ctx.fillStyle = C.gridText; ctx.font = "9px 'JetBrains Mono', monospace"; ctx.textAlign = "center";
+    for (let t = 0; t <= DUR; t += 2) {
+      const x = p.l + (t / DUR) * pw;
+      ctx.strokeStyle = C.grid;
+      ctx.beginPath(); ctx.moveTo(x, p.t); ctx.lineTo(x, h - p.b); ctx.stroke();
+      if (t > 0 && t < DUR) ctx.fillText(t + "s", x, h - 2);
+    }
+
+    // Scale — compute across signal + overlay if present
+    let maxV = 0;
+    for (let i = 0; i < signal.length; i++) maxV = Math.max(maxV, Math.abs(signal[i]));
+    if (overlay) for (let i = 0; i < overlay.length; i++) maxV = Math.max(maxV, Math.abs(overlay[i]));
+    if (maxV === 0) maxV = 1;
+    const sc = (ph / 2 - 4) / maxV;
+
+    // Draw overlay first (behind main signal)
+    if (overlay) {
+      ctx.beginPath();
+      ctx.strokeStyle = overlayColor || "#fff";
+      ctx.lineWidth = 1.5;
+      if (overlayDashed) ctx.setLineDash([4, 3]);
+      for (let i = 0; i < overlay.length; i++) {
+        const x = p.l + (i / overlay.length) * pw;
+        const y = midY - overlay[i] * sc;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Main signal
+    if (isEnvelope) {
+      ctx.beginPath();
+      ctx.moveTo(p.l, midY);
+      for (let i = 0; i < signal.length; i++)
+        ctx.lineTo(p.l + (i / signal.length) * pw, midY - signal[i] * sc);
+      ctx.lineTo(w - p.r, midY);
+      ctx.closePath();
+      const grd = ctx.createLinearGradient(0, p.t, 0, h - p.b);
+      grd.addColorStop(0, color + "50"); grd.addColorStop(0.5, color + "20"); grd.addColorStop(1, color + "05");
+      ctx.fillStyle = grd; ctx.fill();
+
+      ctx.beginPath();
+      for (let i = 0; i < signal.length; i++) {
+        const x = p.l + (i / signal.length) * pw, y = midY - signal[i] * sc;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.lineJoin = "round";
+      for (let i = 0; i < signal.length; i++) {
+        const x = p.l + (i / signal.length) * pw, y = midY - signal[i] * sc;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // Labels
+    if (labels) {
+      ctx.font = "bold 9px 'JetBrains Mono', monospace"; ctx.textAlign = "center";
+      for (let i = 0; i < labels.length; i++) {
+        if (!labels[i]) continue;
+        const x = p.l + (i / signal.length) * pw;
+        const y = midY - signal[i] * sc;
+        const key = labels[i].replace(/\s/g, "");
+        const col = C[key] || "#fff";
+        const text = labels[i].toUpperCase();
+        const tw = ctx.measureText(text).width + 10;
+        const ly = labels[i] === "braking" ? midY + ph * 0.35 : p.t + 6;
+        ctx.strokeStyle = col + "66"; ctx.lineWidth = 0.8;
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, ly); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = col + "22"; ctx.strokeStyle = col + "55"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.roundRect(x - tw / 2, ly - 2, tw, 15, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = col; ctx.fillText(text, x, ly + 10);
+      }
+    }
+
+    // Playhead overlay — dim everything to the right of the current playhead
+    // and draw a vertical cursor line. When playhead === 1 this is a no-op so
+    // the static view is unchanged.
+    if (playhead < 1) {
+      const phX = p.l + playhead * pw;
+      ctx.fillStyle = "rgba(15, 23, 41, 0.72)"; // C.bg at ~72% — dims the signal visibly without hiding it
+      ctx.fillRect(phX, 0, w - phX, h);
+      ctx.strokeStyle = C.combined;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = C.combined;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.moveTo(phX, p.t);
+      ctx.lineTo(phX, h - p.b);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+  }, [signal, color, height, labels, isEnvelope, overlay, overlayColor, overlayDashed, playhead]);
+
+  return (
+    <div ref={boxRef} style={{ width: "100%", position: "relative" }}>
+      <canvas ref={cRef} style={{ display: "block", width: "100%" }} />
+    </div>
+  );
+}
+
+// ── Stage card ───────────────────────────────────────────────────────────────
+// Icon used on every stage that can be sonified. Click to listen to this
+// signal; click again to mute.
+function SpeakerButton({ audioKey, color }) {
+  const { activeKey, setKey } = useContext(AudioSelectionContext);
+  const active = activeKey === audioKey;
+  return (
+    <button
+      onClick={() => setKey(active ? null : audioKey)}
+      title={active ? "Mute" : "Listen to this signal"}
+      aria-pressed={active}
+      style={{
+        marginLeft: "auto",
+        width: 26, height: 26, borderRadius: 8,
+        border: `1.5px solid ${active ? color : C.border}`,
+        background: active ? color + "22" : "transparent",
+        color: active ? color : C.dim,
+        cursor: "pointer", padding: 0,
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        transition: "all 0.15s ease",
+      }}
+    >
+      {active ? (
+        // Speaker with sound waves
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 6h2l3-2.5v9L5 10H3z" fill="currentColor" />
+          <path d="M10.5 5.5a3.5 3.5 0 0 1 0 5" />
+          <path d="M12.5 3.5a6 6 0 0 1 0 9" />
+        </svg>
+      ) : (
+        // Muted speaker
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 6h2l3-2.5v9L5 10H3z" fill="currentColor" />
+          <path d="M10.5 6l3 3M13.5 6l-3 3" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+function Stage({ num, title, desc, color, children, audioKey }) {
+  return (
+    <div style={{
+      background: C.card, borderRadius: 10, border: `1px solid ${color}33`,
+      padding: "14px 16px 10px", position: "relative", overflow: "hidden",
+    }}>
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: 2,
+        background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
+      }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+        <div style={{
+          width: 24, height: 24, borderRadius: 6,
+          background: color + "22", border: `1px solid ${color}44`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 11, fontWeight: 700, color, fontFamily: "'JetBrains Mono', monospace",
+        }}>{num}</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{title}</div>
+        {audioKey && <SpeakerButton audioKey={audioKey} color={color} />}
+      </div>
+      {children}
+      {desc && <div style={{ fontSize: 11, color: C.dim, marginTop: 6, lineHeight: 1.6 }}>{desc}</div>}
+    </div>
+  );
+}
+
+function Pill({ label, color, active, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: "6px 14px", borderRadius: 20,
+      border: `1.5px solid ${active ? color : C.border}`,
+      background: active ? color + "1A" : "transparent",
+      color: active ? color : C.dim,
+      fontSize: 12, fontWeight: 600, cursor: "pointer",
+      fontFamily: "'JetBrains Mono', monospace",
+      display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s ease",
+    }}>
+      <span style={{
+        width: 8, height: 8, borderRadius: "50%",
+        background: active ? color : "transparent",
+        border: active ? "none" : `1.5px solid ${C.dim}`,
+      }} />
+      {label}
+    </button>
+  );
+}
+
+function Arrow({ label }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, color: C.dim, fontSize: 16, lineHeight: 1 }}>
+      {label ? <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.05em" }}>{label}</span> : null}
+      <span>↓</span>
+    </div>
+  );
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+function App() {
+  const [comp, setComp] = useState({ pedaling: true, roughSurface: true, pothole: true, braking: true });
+  const [showPrediction, setShowPrediction] = useState(true);
+  const [showActual, setShowActual] = useState(true);
+  const toggle = (k) => setComp(p => ({ ...p, [k]: !p[k] }));
+
+  // Playback: playhead is a 0..1 fraction across the 10s signal.
+  // playing === true means the RAF loop is advancing it.
+  // Looping is automatic — when the head hits 1 it snaps back to 0 and keeps going.
+  // Defaults to autoplay from 0 on mount (visual only — audio stays muted until
+  // the user clicks a speaker, because browsers block audio autoplay).
+  const [playing, setPlaying] = useState(true);
+  const [playhead, setPlayhead] = useState(0);
+  const rafRef = useRef(null);
+  const anchorRef = useRef({ startWall: 0, startPh: 0 });
+
+  // Audio: which stage's signal is currently sonified (null = muted).
+  const [audioKey, setAudioKey] = useState(null);
+  const audioCtxRef = useRef(null);
+  const audioSourceRef = useRef(null);
+  const audioGainRef = useRef(null);
+
+  useEffect(() => {
+    if (!playing) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      return;
+    }
+    // If the user hit play while the head was parked at the end, rewind to 0.
+    const startPh = playhead >= 1 ? 0 : playhead;
+    anchorRef.current = { startWall: performance.now(), startPh };
+    const tick = (now) => {
+      const { startWall, startPh } = anchorRef.current;
+      let ph = startPh + (now - startWall) / (DUR * 1000);
+      if (ph >= 1) {
+        // Loop — keep playing from the start rather than stopping.
+        ph = ph % 1;
+        anchorRef.current = { startWall: now, startPh: 0 };
+      }
+      setPlayhead(ph);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [playing]);
+
+  const onPlayPause = () => {
+    if (playing) {
+      setPlaying(false);
+    } else {
+      if (playhead >= 1) setPlayhead(0);
+      setPlaying(true);
+    }
+  };
+  const onReset = () => {
+    setPlaying(false);
+    setPlayhead(1);
+  };
+
+  const data = useMemo(() => {
+    const { signal: raw, labels } = generateSignal(comp);
+    const hp = highPass(raw, 0.1);
+    const fd = firstDiff(hp);
+    const median = rollingMedian(fd, 120);
+    const madEnv = rollingMAD(fd, 120);
+    const lpc = lpcPipeline(raw, LPC_ORDER, 120);
+    const combo = combined(madEnv, lpc.envelope);
+    return { raw, labels, hp, fd, median, madEnv, lpc, combo };
+  }, [comp]);
+
+  // Map audioKey → the signal array to sonify.
+  const signalForKey = (key) => {
+    switch (key) {
+      case "raw":      return data.raw;
+      case "hp":       return data.hp;
+      case "fd":       return data.fd;
+      case "madEnv":   return data.madEnv;
+      case "lpcResid": return data.lpc.residual;
+      case "lpcEnv":   return data.lpc.envelope;
+      case "combo":    return data.combo;
+      default:         return null;
+    }
+  };
+
+  const stopAudio = () => {
+    if (audioSourceRef.current) {
+      try { audioSourceRef.current.stop(); } catch (e) {}
+      audioSourceRef.current.disconnect();
+      audioSourceRef.current = null;
+    }
+    if (audioGainRef.current) {
+      audioGainRef.current.disconnect();
+      audioGainRef.current = null;
+    }
+  };
+
+  // Start audio for the given signal at the given offset (seconds). Loops
+  // automatically so the audio stays aligned with the visual playhead's loop.
+  const startAudio = (signalArray, offsetSec) => {
+    stopAudio();
+    if (!signalArray) return;
+    if (!audioCtxRef.current) {
+      const Ctor = window.AudioContext || window.webkitAudioContext;
+      if (!Ctor) return;
+      audioCtxRef.current = new Ctor();
+    }
+    const ctx = audioCtxRef.current;
+    if (ctx.state === "suspended") ctx.resume();
+    const buffer = sonify(signalArray, ctx);
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.55;
+    source.connect(gain).connect(ctx.destination);
+    source.start(0, Math.max(0, Math.min(offsetSec, DUR - 0.001)));
+    audioSourceRef.current = source;
+    audioGainRef.current = gain;
+  };
+
+  // Keep audio in sync with {playing, audioKey, comp}. On any of those changes,
+  // rebuild the source node at the current playhead.
+  useEffect(() => {
+    if (!playing || !audioKey) {
+      stopAudio();
+      return;
+    }
+    const sig = signalForKey(audioKey);
+    startAudio(sig, playhead * DUR);
+    return () => stopAudio();
+    // playhead is intentionally omitted — audio loops at the buffer level, so
+    // we don't want to recreate the source every frame.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, audioKey, comp]);
+
+  // Cleanup on unmount
+  useEffect(() => () => {
+    stopAudio();
+    if (audioCtxRef.current) {
+      try { audioCtxRef.current.close(); } catch (e) {}
+      audioCtxRef.current = null;
+    }
+  }, []);
+
+  return (
+    <AudioSelectionContext.Provider value={{ activeKey: audioKey, setKey: setAudioKey }}>
+    <PlayheadContext.Provider value={playhead}>
+    <div style={{
+      fontFamily: "'DM Sans', 'Helvetica Neue', sans-serif",
+      background: C.bg, color: C.text,
+      minHeight: "100vh", padding: "28px 20px", maxWidth: 760, margin: "0 auto",
+    }}>
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{
+          fontSize: 10, fontWeight: 700, letterSpacing: "0.15em",
+          color: C.combined, textTransform: "uppercase", marginBottom: 6,
+          fontFamily: "'JetBrains Mono', monospace",
+        }}>BUMPY ROADS — SIGNAL PROCESSING PIPELINE</div>
+        <h1 style={{
+          fontSize: 22, fontWeight: 700, lineHeight: 1.3,
+          background: `linear-gradient(135deg, ${C.text}, ${C.dim})`,
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+        }}>From Raw Accelerometer to Road Roughness Score</h1>
+        <p style={{ fontSize: 13, color: C.dim, marginTop: 6, lineHeight: 1.5 }}>
+          A phone on a bike handlebar feels everything — pedaling, braking, potholes, and road roughness.
+          Toggle noise sources to see how each processing stage isolates what we actually care about.
+        </p>
+      </div>
+
+      {/* Toggles + playback */}
+      <div style={{
+        background: C.card, borderRadius: 10, border: `1px solid ${C.border}`,
+        padding: "12px 16px", marginBottom: 16,
+      }}>
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          gap: 12, marginBottom: 10, flexWrap: "wrap",
+        }}>
+          <div style={{
+            fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
+            color: C.dim, textTransform: "uppercase",
+            fontFamily: "'JetBrains Mono', monospace",
+          }}>WHAT THE PHONE FEELS</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button onClick={onPlayPause} style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "6px 14px", borderRadius: 20,
+              border: `1.5px solid ${C.combined}`,
+              background: playing ? C.combined + "22" : C.combined + "11",
+              color: C.combined, fontSize: 12, fontWeight: 700, cursor: "pointer",
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>
+              <span style={{ fontSize: 10, lineHeight: 1 }}>
+                {playing ? "❚❚" : "▶"}
+              </span>
+              {playing ? "PAUSE" : (playhead < 1 && playhead > 0 ? "RESUME" : "PLAY")}
+            </button>
+            <button onClick={onReset} disabled={playhead >= 1 && !playing} style={{
+              padding: "6px 10px", borderRadius: 20,
+              border: `1.5px solid ${C.border}`,
+              background: "transparent",
+              color: C.dim, fontSize: 11, fontWeight: 600,
+              cursor: (playhead >= 1 && !playing) ? "default" : "pointer",
+              opacity: (playhead >= 1 && !playing) ? 0.4 : 1,
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>RESET</button>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 11, color: C.dim, minWidth: 56, textAlign: "right",
+            }}>{(playhead * DUR).toFixed(1)}s / {DUR}s</div>
+          </div>
+        </div>
+        {/* Progress bar */}
+        <div style={{
+          height: 2, background: C.border, borderRadius: 1, marginBottom: 12,
+          overflow: "hidden",
+        }}>
+          <div style={{
+            height: "100%", width: `${playhead * 100}%`,
+            background: C.combined, transition: playing ? "none" : "width 120ms ease-out",
+          }} />
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <Pill label="Pedaling ~1.5Hz" color={C.pedaling} active={comp.pedaling} onClick={() => toggle("pedaling")} />
+          <Pill label="Rough Surface 5-30Hz" color={C.roughSurface} active={comp.roughSurface} onClick={() => toggle("roughSurface")} />
+          <Pill label="Pothole Spike" color={C.pothole} active={comp.pothole} onClick={() => toggle("pothole")} />
+          <Pill label="Braking" color={C.braking} active={comp.braking} onClick={() => toggle("braking")} />
+        </div>
+      </div>
+
+      {/* Pipeline */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+        {/* 1. Raw */}
+        <Stage num="1" title="Raw Accelerometer Signal" color={C.raw} audioKey="raw"
+          desc="Everything the phone feels, all mixed together. Pedaling is the big slow wave, road bumps are the fast noise, the pothole is the spike, and braking is the dip. We need to separate these.">
+          <Wave signal={data.raw} color={C.raw} labels={data.labels} height={130} />
+        </Stage>
+
+        <Arrow />
+
+        {/* 2. High-pass filter */}
+        <Stage num="2" title="High-Pass Filter" color={C.hp} audioKey="hp"
+          desc="An exponential moving average removes slow-changing signals. Pedaling (~1.5Hz) and braking are slow movements — they get filtered out. Fast vibrations from bumps (5-30Hz) pass through. Toggle 'Pedaling' to see it disappear here.">
+          <Wave signal={data.hp} color={C.hp} height={110} />
+        </Stage>
+
+        <Arrow />
+
+        {/* 3. First difference */}
+        <Stage num="3" title="First Difference" color={C.fd} audioKey="fd"
+          desc="Subtract each sample from the previous one. This further amplifies rapid changes (bumps) and suppresses anything that changes slowly. At 60Hz sampling, this acts as a ~10Hz cutoff.">
+          <Wave signal={data.fd} color={C.fd} height={100} />
+        </Stage>
+
+        <Arrow label="SIGNAL SPLITS INTO TWO PATHS" />
+
+        {/* Two paths */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {/* MAD path */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
+              color: C.mad, textTransform: "uppercase", textAlign: "center",
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>PATH A — OUR ALGORITHM</div>
+
+            {/* 4a: Rolling median */}
+            <Stage num="4a" title="Rolling Median" color={C.mad}
+              desc="Compute the median value over a 2-second sliding window. This becomes the baseline — the 'expected' signal level.">
+              <Wave signal={data.median} color={C.mad} height={70} />
+            </Stage>
+
+            <Arrow />
+
+            {/* 5a: MAD */}
+            <Stage num="5a" title="MAD Envelope" color={C.mad} audioKey="madEnv"
+              desc="Median Absolute Deviation — how far each sample is from that median, in the median sense. Robust to outliers: a single pothole spike doesn't move the median, so MAD stays low. But sustained roughness pushes it up.">
+              <Wave signal={data.madEnv} color={C.mad} height={80} isEnvelope />
+            </Stage>
+          </div>
+
+          {/* LPC path */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
+              color: C.lpc, textTransform: "uppercase", textAlign: "center",
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>PATH B — SMARTROADSENSE PAPER</div>
+
+            {/* 4b: LPC predicted vs actual */}
+            <Stage num="4b" title="LPC: Predicted vs Actual" color={C.lpc}>
+              <Wave
+                signal={showActual ? data.raw : new Float64Array(N)}
+                color={C.raw} height={80}
+                overlay={showPrediction ? Array.from(data.lpc.predicted) : null}
+                overlayColor="#22D3EE" overlayDashed={false} />
+              <div style={{ display: "flex", gap: 8, marginTop: 4, fontSize: 10, alignItems: "center" }}>
+                <button onClick={() => setShowActual(p => !p)} style={{
+                  display: "flex", alignItems: "center", gap: 4,
+                  background: showActual ? C.raw + "1A" : "transparent",
+                  border: `1.5px solid ${showActual ? C.raw : C.border}`,
+                  borderRadius: 12, padding: "2px 10px", cursor: "pointer",
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                  color: showActual ? C.raw : C.dim, transition: "all 0.2s ease",
+                }}>
+                  <span style={{
+                    width: 6, height: 6, borderRadius: "50%",
+                    background: showActual ? C.raw : "transparent",
+                    border: showActual ? "none" : `1.5px solid ${C.dim}`,
+                  }} />
+                  actual signal
+                </button>
+                <button onClick={() => setShowPrediction(p => !p)} style={{
+                  display: "flex", alignItems: "center", gap: 4,
+                  background: showPrediction ? "#22D3EE1A" : "transparent",
+                  border: `1.5px solid ${showPrediction ? "#22D3EE" : C.border}`,
+                  borderRadius: 12, padding: "2px 10px", cursor: "pointer",
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                  color: showPrediction ? "#22D3EE" : C.dim, transition: "all 0.2s ease",
+                }}>
+                  <span style={{
+                    width: 6, height: 6, borderRadius: "50%",
+                    background: showPrediction ? "#22D3EE" : "transparent",
+                    border: showPrediction ? "none" : `1.5px solid ${C.dim}`,
+                  }} />
+                  LPC prediction
+                </button>
+              </div>
+              <div style={{ fontSize: 11, color: C.dim, marginTop: 4, lineHeight: 1.6 }}>
+                LPC learns the signal's pattern and predicts each sample from the previous 8. It tracks the <span style={{ color: C.pedaling }}>pedaling wave</span> closely — pedaling is periodic, so it gets subtracted out. It can't predict <span style={{ color: C.roughSurface }}>random road noise</span> or the <span style={{ color: C.pothole }}>pothole spike</span>. You'll see it "ring" briefly after the pothole — the spike passes through LPC's 8-sample memory before fading. That ringing shows up in the residual too, which is actually what makes LPC good at catching potholes.
+              </div>
+            </Stage>
+
+            <Arrow />
+
+            {/* 5b: Prediction residual */}
+            <Stage num="5b" title="Prediction Residual" color={C.lpc} audioKey="lpcResid"
+              desc="The gap between prediction and reality — what LPC couldn't predict. Smooth roads = small residual. Potholes and bumps = large residual. This is the road roughness signal.">
+              <Wave signal={Array.from(data.lpc.residual)} color={C.lpc} height={80} />
+            </Stage>
+          </div>
+        </div>
+
+        <Arrow />
+
+        {/* Smoothing note */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <Stage num="6a" title="MAD Roughness Envelope" color={C.mad} audioKey="madEnv"
+            desc="The MAD values form a smooth envelope showing roughness over time. High during the rough patch, nearly flat during the pothole.">
+            <Wave signal={data.madEnv} color={C.mad} height={70} isEnvelope />
+          </Stage>
+
+          <Stage num="6b" title="LPC Roughness Envelope" color={C.lpc} audioKey="lpcEnv"
+            desc="Smoothed RMS of the prediction residual. High during the rough patch AND the pothole — LPC catches both because neither is predictable.">
+            <Wave signal={Array.from(data.lpc.envelope)} color={C.lpc} height={70} isEnvelope />
+          </Stage>
+        </div>
+
+        <Arrow label="PATHS REJOIN" />
+
+        {/* Merge */}
+        <div style={{
+          display: "flex", justifyContent: "center", alignItems: "center", gap: 8,
+          color: C.dim, fontSize: 13, padding: "2px 0",
+          fontFamily: "'JetBrains Mono', monospace",
+        }}>
+          <div style={{ flex: 1, height: 1, background: C.mad + "44" }} />
+          <span style={{ color: C.combined }}>{"√(MAD × LPC)"}</span>
+          <div style={{ flex: 1, height: 1, background: C.lpc + "44" }} />
+        </div>
+
+        {/* 7. Combined */}
+        <Stage num="7" title="Combined Roughness Score" color={C.combined} audioKey="combo"
+          desc="Geometric mean — both algorithms must agree. MAD alone misses the pothole. LPC alone is noisier on smooth roads. Together they catch everything while staying quiet when there's nothing to report.">
+          <Wave signal={data.combo} color={C.combined} height={120} isEnvelope />
+          <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+            <div style={{ flex: 1, padding: "8px 10px", background: C.mad + "11", borderRadius: 6, border: `1px solid ${C.mad}22`, fontSize: 11 }}>
+              <span style={{ color: C.mad, fontWeight: 600 }}>MAD</span>
+              <span style={{ color: C.dim }}> — sees sustained roughness, misses isolated potholes</span>
+            </div>
+            <div style={{ flex: 1, padding: "8px 10px", background: C.lpc + "11", borderRadius: 6, border: `1px solid ${C.lpc}22`, fontSize: 11 }}>
+              <span style={{ color: C.lpc, fontWeight: 600 }}>LPC</span>
+              <span style={{ color: C.dim }}> — sees potholes AND roughness, slightly noisier</span>
+            </div>
+          </div>
+        </Stage>
+
+        {/* Try-it callout */}
+        <div style={{
+          background: `linear-gradient(135deg, ${C.combined}08, ${C.combined}15)`,
+          borderRadius: 10, border: `1px solid ${C.combined}33`,
+          padding: "16px 20px", marginTop: 4,
+        }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: C.combined, marginBottom: 6 }}>
+            Try it yourself
+          </div>
+          <div style={{ fontSize: 12, color: C.dim, lineHeight: 1.7 }}>
+            <strong style={{ color: C.text }}>Toggle "Pothole" off and on</strong> — MAD barely changes (2 samples in 120 don't move the median), but LPC spikes clearly at step 5b.
+            <br />
+            <strong style={{ color: C.text }}>Toggle "Pedaling" off and on</strong> — it dominates the raw signal, but watch step 4b: LPC predicts it perfectly, so it vanishes from the residual.
+            <br />
+            <strong style={{ color: C.text }}>Turn off everything</strong> — now the signal is completely flat. No sources, no roughness.
+          </div>
+        </div>
+
+        {/* Additional real-world notes */}
+        <div style={{
+          background: C.card, borderRadius: 10, border: `1px solid ${C.border}`,
+          padding: "16px 20px",
+        }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.text, marginBottom: 8 }}>
+            In the real app, two more things happen:
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 11, color: C.dim, lineHeight: 1.6 }}>
+            <div>
+              <span style={{ color: C.hp, fontWeight: 600 }}>Vertical weighting</span> — The phone has 3 axes (X, Y, Z). Road bumps mostly hit the axis aligned with gravity. Calibration tells us which axis that is, and we weight it more heavily (typically 96% of the score).
+            </div>
+            <div>
+              <span style={{ color: C.roughSurface, fontWeight: 600 }}>Speed normalization</span> — The same pothole feels worse at speed. We normalize to a reference speed (14.4 km/h) so scores are comparable regardless of how fast you were going.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </PlayheadContext.Provider>
+    </AudioSelectionContext.Provider>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+  </script>
+</body>
+</html>
