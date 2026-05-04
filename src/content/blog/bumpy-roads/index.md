@@ -5,7 +5,6 @@ date: 2026-04-18
 image: ./cover.jpg
 tags: [civic-hacking, ai-coding, signal-processing, new-orleans, cycling, side-projects, bike-streets, accelerometer, lpc, smartroadsense]
 author: Adam Davies
-draft: true
 ---
 
 ## The original idea
@@ -136,8 +135,8 @@ There's still a pile of things I'd like to do:
 
 ## What I actually took away from this
 
-This is the first non-trivial thing I've ever built that leaned on maths I don't really understand. Two years ago I read the SmartRoadSense paper, decided it was out of reach, and shelved it. The *exact same paper* this year was doable on a long weekend. Not because the maths got any easier. It was because I had someone in the loop who could read the paper with me, explain the Levinson-Durbin recursion three different ways until I actually got it, and then write the implementation while I watched and asked questions. The bit that surprised me wasn't that Claude could write the code. It was that I stopped being allergic to the research.
+This is the first non-trivial thing I've ever built that leaned on maths I don't really understand. Two years ago I read the SmartRoadSense paper, decided it was out of reach, and shelved it. The *exact same paper* this year was doable on a long weekend. Not because the maths got any easier. It was because I had someone in the loop who could read the paper with me, explain the Levinson-Durbin recursion three different ways until I actually got it, and then write the implementation while I watched and asked questions. The bit that surprised me wasn't that Claude could write the code. It was how useful it was when it came to this understand more complex mathamatics.
 
-The other takeaway: start with the dumbest possible version of the algorithm. "Absolute value minus gravity" is nonsense as a roughness metric, but riding around with it on my phone taught me more about the problem, about pedaling cadence, about braking jolts, about the fact that the phone sits at a weird angle in the mount, than any amount of reading would have. Pretty much every later fix in the git history corresponds to a specific ride where the previous version was embarrassingly wrong about something I could now name. The research paper was useful, but only once I already knew what I was looking at.
+The other takeaway was that it was also fun to start with the dumbest possible version of the algorithm and see how well Claude could build its own. "Absolute value minus gravity" is nonsense as a roughness metric, but riding around with it on my phone taught me more about the problem, about pedaling cadence, about braking jolts, about the fact that the phone sits at a weird angle in the mount, than any amount of reading would have. Pretty much every later fix in the git history corresponds to a specific ride where the previous version was embarrassingly wrong about something I could now name. The research paper was useful, but it was helpful to build this with Claude from first principles. 
 
-If you're in New Orleans and you ride, come find me. The app is free and the more bikes on it the sharper the map gets.
+If you're in New Orleans and you ride, try out the app at bumpyroads.org. The app is free and the more bikes on it the sharper the map gets!
